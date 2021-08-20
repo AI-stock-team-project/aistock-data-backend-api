@@ -4,14 +4,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import FinanceDataReader as fdr
 import datetime
-from dateutil.relativedelta import relativedelta # 몇달 전, 몇달 후, 몇년 전, 몇년 후 를 구하고 싶다면 relativedelta
+from dateutil.relativedelta import relativedelta  # 몇달 전, 몇달 후, 몇년 전, 몇년 후 를 구하고 싶다면 relativedelta
 from pypfopt.efficient_frontier import EfficientFrontier
 from pypfopt import risk_models
 from pypfopt import expected_returns
 from pypfopt.discrete_allocation import DiscreteAllocation, get_latest_prices
-import warnings
 import numpy as np
-warnings.filterwarnings(action='ignore')
 
 
 class OptimizeMethod(Enum):
@@ -178,7 +176,7 @@ def make_portfolio(optimize_method=OptimizeMethod.Efficient, asset_method=AssetM
     inv_total_weight = {}
     for i in allocation.keys():
         inv_total_weight[i] = inv_total_price[i] / investment
-    inv_total_weight
+    print(inv_total_weight)
 
     # 투자비중의 합계
     investment_w = 0
@@ -212,7 +210,7 @@ def make_portfolio(optimize_method=OptimizeMethod.Efficient, asset_method=AssetM
     # 투자 금액에 따라 최적화된 포트폴리오 종목별 수량
     portfolio_df_sorted.loc["합계", 2:] = portfolio_df_sorted.sum()
 
-    ################# 코스피랑 비교 ####################
+    # ################ 코스피랑 비교 ####################
     # 각 일자별, 종목별 종가에 해당 weights를 곱해주기
     for i, weight in cleaned_weights.items():
         dfnull[i] = dfnull[i] * weight

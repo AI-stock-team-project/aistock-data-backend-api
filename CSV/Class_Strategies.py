@@ -1,42 +1,101 @@
+import csv
+
 import pandas as pd
 import FinanceDataReader as fdr
 from pykrx import stock
-import datetime
-import warnings
-warnings.filterwarnings(action='ignore')
-
-today = datetime.datetime.today().strftime("%Y%m%d")
-kospi = stock.get_market_fundamental_by_ticker(today, market='KOSPI').index
-kosdaq = stock.get_market_fundamental_by_ticker(today, market='KOSDAQ').index
-stocks = kospi.append(kosdaq)
+from datetime import datetime, timedelta
+import os
+# today = datetime.datetime.today().strftime("%Y%m%d")
+# kospi = stock.get_market_fundamental_by_ticker(today, market='KOSPI').index
+# kosdaq = stock.get_market_fundamental_by_ticker(today, market='KOSDAQ').index
+# stocks = kospi.append(kosdaq)
 #
 # with open('stocks.csv', 'w') as file:
 #     write = csv.writer(file)
 #     write.writerow(stocks)
 
 # stocks = pd.read_csv('stocks.csv')
+g_stocks = None
+
+
+def load_stocks():
+    """
+    종목을 조회하는 함수
+    :return: 종목 코드 목록 (DataFrame)
+    """
+    today = datetime.today().strftime("%Y%m%d")
+    tickers = stock.get_market_ticker_list(today, market='KOSDAQ')
+    tickers2 = stock.get_market_ticker_list(today, market='KOSPI')
+    tickers.extend(tickers2)
+    df_tickers = pd.DataFrame(tickers, columns=['ticker'])
+    return df_tickers
+
+
+def get_stocks():
+    """
+    종목을 가져오기
+    :return: 종목 목록 (DataFrame)
+    """
+    # filename = "stocks.csv"
+    is_global_enabled = True
+
+    if not is_global_enabled:
+        # 글로벌 변수를 이용하지 않고 바로바로 로드할 경우
+        return load_stocks()
+
+    global g_stocks
+
+    if g_stocks is not None:
+        return g_stocks
+        # df_tickers = pd.read_csv(filename)
+        # return df_tickers
+    else:
+        g_stocks = load_stocks()
+        return g_stocks
+        # df_tickers.to_csv(filename, index=False)
+        # return df_tickers
+        # today = datetime.today().strftime("%Y%m%d")
+        # kospi = stock.get_market_fundamental_by_ticker(today, market='KOSPI').index
+        # kosdaq = stock.get_market_fundamental_by_ticker(today, market='KOSDAQ').index
+        # stocks = kospi.append(kosdaq)
+        # stocks.to_csv('stocks.csv', index=False)
+        # with open('stocks.csv', 'w') as file:
+        #    write = csv.writer(file)
+        #    write.writerow(stocks)
+
+
+# 현재 듀얼 모멘텀으로 어떤 주식을 사야 하는지 리스트화
+def bool_converter(bool_var):
+    """Returns Integer Value from Boolean Value
+    Parameters
+    ----------
+    bool_var : boolean
+        Boolean variables representing trade signals
+    Returns
+    -------
+    result : int
+        Integer variables representing trade signals
+    """
+    if bool_var:
+        return 1
+    else:
+        return 0
 
 
 class Strategies:
-    def __init__(self, code_instance, stocks_1mo, stocks_3mos, code_updown, stocks_updown, index_name, start_date, bool_var,
-                 prices, lookback_period, n_selection):
-        self.code_instance = code_instance
-        self.stocks_1mo = stocks_1mo
-        self.stocks_3mos = stocks_3mos
-        self.code_updown = code_updown
-        self.stocks_updown = stocks_updown
-        self.indexName = index_name
-        self.start_date = start_date
-        self.bool_var = bool_var
-        self.prices = prices
-        self.lookback_period = lookback_period
-        self.n_selection = n_selection
 
-# ---------------------------------------------------------------------------------------- #
-    # 급등주 함수
-    def check_speedy_rising_volume_yesterday(self, code_instance):  # 어제를 기준으로
-        today = datetime.datetime.today().strftime("%Y%m%d")
-        df = fdr.DataReader(code_instance, '2020-01-01')
+    @staticmethod
+    def check_speedy_rising_volume_yesterday(code_instance):
+        """
+        급등주 여부를 검사하는 함수
+        어제를 기준으로 그보다 더전의 20일간의 평균을 구해서 비교
+        :param code_instance: ticker 코드
+        :type code_instance: str
+        :return: bool
+        """
+        # today = datetime.today().strftime("%Y%m%d")
+        start_date = (datetime.now() + timedelta(days=-30)).strftime('%Y-%m-%d')
+        df = fdr.DataReader(code_instance, start_date)
         volumes = df['Volume'].iloc[::-1]
 
         if len(volumes) < 22:  # 총 22일 치의 데이터가 없을 경우 제외(최근 상장 종목)
@@ -59,31 +118,50 @@ class Strategies:
         if today_vol > avg_vol20 * 10:  # 조회 시작일의 거래량이 평균 거래량을 1000% 초과한다면 True
             return True
 
-    # 어제 거래량이 1000% 오늘 종목 찾기
-    def run(self):
+    @staticmethod
+    def run():
+        """
+        어제 거래량이 1000% 오늘 종목 목록
+        :return: list
+        """
         speedy_rising_volume_list = []
-        num = len(stocks)
+        # stocks = get_stocks()
+        # num = len(stocks)
 
-        for i, code_instance in enumerate(stocks):
-            if Strategies.check_speedy_rising_volume_yesterday(i, code_instance): # i 를 넣지 않으면 missing 1 requirement 계속 뜸. 급등주:  025860 7/30일
-                #print("급등주: ", code_instance)
-                #print(i) # 209 355 이게 뭐지??
-                speedy_rising_volume_list.append(code_instance)
+        # for i, code_instance in enumerate(stocks):
+        stocklist = get_stocks()
+        for i, s in stocklist.iterrows():
+            ticker = s[0]
+            if Strategies.check_speedy_rising_volume_yesterday(ticker):  # i 를 넣지 않으면 missing 1 requirement 계속 뜸. 급등주:  025860 7/30일
+                # print("급등주: ", code_instance)
+                # print(i) # 209 355 이게 뭐지??
+                speedy_rising_volume_list.append(ticker)
         return speedy_rising_volume_list
-# ------------------------------------------------------------------------------- #
-    # 모멘텀 1개월 함수
-    def momentum_1month(self):  # 종목 list넣으면, 모멘텀 순위 있는 데이터프레임 출력
-        df_momentum = pd.DataFrame()
 
-        for s in stocks : #Strategies.today_stocks():
-            df_momentum[s] = fdr.DataReader(s, '2021-01-01')['Close']
+    @staticmethod
+    def momentum_1month():
+        """
+        모멘텀 1개월 종목을 가져오는 함수
+        모멘텀 순위 있는 데이터프레임 출력
+        :return: DataFrame
+        """
+        # df = pd.DataFrame()
+        # stocks = get_stocks()
+        start_date = (datetime.now() + timedelta(days=-30)).strftime('%Y-%m-%d')
+        # for _code in stocks:
+        # for i, s in stocks.iterrows():
+        #    ticker = s[0]
+        #    df[ticker] = fdr.DataReader(ticker, start_date)['Close']
+        #    # s = fdr.DataReader(_code, start_date)['Close'].rename(_code)
+        #    # df = pd.concat([df, s], axis=1)
+        df = Strategies.getCloseDatafromList(start_date)
 
         # 20 영업일 수익률
-        return_df = df_momentum.pct_change(20)
-        return_df
+        return_df = df.pct_change(20)
+        # return_df
 
         # 오늘 날짜
-        today = datetime.datetime.today().strftime("%Y-%m-%d")
+        today = datetime.today().strftime("%Y-%m-%d")
 
         # index는 종목 코드이고 모멘텀 데이터 있는 데이터 프레임으로 만들기
         s = return_df.loc[today]
@@ -92,20 +170,30 @@ class Strategies:
 
         momentum_df['순위'] = momentum_df['모멘텀'].rank(ascending=False)
         momentum_df = momentum_df.sort_values(by='순위')
-        return momentum_df  # 모멘텀
+        return momentum_df
 
-    # 모멘텀 3개월 함수
-    def momentum_3months(self):  # 종목 list넣으면, 모멘텀 순위 있는 데이터프레임 출력
-        df = pd.DataFrame()
-        for s in stocks:
-            df[s] = fdr.DataReader(s, '2021-01-01')['Close']
+    @staticmethod
+    def momentum_3months():
+        """
+        모멘텀 3개월 종목을 가져오는 함수
+        모멘텀 순위 있는 데이터프레임 출력
+        :return: DataFrame
+        """
+        # df = pd.DataFrame()
+        # stocks = get_stocks()
+        start_date = (datetime.now() + timedelta(days=-70)).strftime('%Y-%m-%d')
+        # for _code in stocks:
+        #    df[_code] = fdr.DataReader(_code, start_date)['Close']
+        #    # s = fdr.DataReader(_code, start_date)['Close'].rename(_code)
+        #    # df = pd.concat([df, s], axis=1)
+        df = Strategies.getCloseDatafromList(start_date)
 
         # 60 영업일 수익률
         return_df = df.pct_change(60)
-        return_df
+        # return_df
 
         # 오늘 날짜
-        today = datetime.datetime.today().strftime("%Y-%m-%d")
+        today = datetime.today().strftime("%Y-%m-%d")
 
         # index는 종목 코드이고 모멘텀 데이터 있는 데이터 프레임으로 만들기
         s = return_df.loc[today]
@@ -114,11 +202,16 @@ class Strategies:
 
         momentum_df['순위'] = momentum_df['모멘텀'].rank(ascending=False)
         momentum_df = momentum_df.sort_values(by='순위')
-        return momentum_df  # 모멘텀
-# -------------------------------------------------------------------------------- #
-    # 하루 상승빈도 함수 2개
-    def up_down_zero(code_updown):  # 종목과 연도에 맞는 상승/하락/변동 없는 날 수를 리스트 반환
-        today = datetime.datetime.today().strftime("%Y-%m-%d")
+        return momentum_df
+
+    @staticmethod
+    def up_down_zero(code_updown):
+        """
+        종목과 연도에 맞는 상승/하락/변동 없는 날 수를 리스트 반환
+        :param code_updown:
+        :return:
+        """
+        today = datetime.today().strftime("%Y-%m-%d")
         year = today[0:4]
         month_day = today[4:]
         one_year_ago = str(int(year) - 1) + month_day
@@ -140,78 +233,95 @@ class Strategies:
         total_days = len(data_rtn.index)
         return up / total_days, down / total_days, nothing / total_days
 
-    def get_up_down_zero_df(self):  # stocks 리스트를 넣으면, 상승/하락/변동없는 확률 데이터프레임 반환
+    @staticmethod
+    def get_up_down_zero_df():
+        """
+        상승/하락/변동없는 확률 데이터프레임 반환
+        :return:
+        """
         up_list = []
         down_list = []
         zero_list = []
-        for i in stocks:
-            temp = Strategies.up_down_zero(i)
+        # stocks = get_stocks()
+        # for i in stocks:
+        stocklist = get_stocks()
+        for i, s in stocklist.iterrows():
+            ticker = s[0]
+            temp = Strategies.up_down_zero(ticker)
             up_list.append(temp[0])
             down_list.append(temp[1])
             zero_list.append(temp[2])
 
         # 데이터 프레임 만들기
         up_down_zero_df = pd.DataFrame()
-        up_down_zero_df['종목 코드'] = stocks  # 종목코드
+        up_down_zero_df['종목 코드'] = stocklist  # 종목코드
         up_down_zero_df['상승 확률'] = up_list  # 일간 변동률이 양수인 날의 수
         up_down_zero_df['하락 확률'] = down_list  # 일간 변동률이 음수인 날의 수
         up_down_zero_df['변동 없는 확률'] = zero_list  # 일간 변동률이 0인 날의 수
 
         up_down_zero_df['상승 확률 높은 순위'] = up_down_zero_df['상승 확률'].rank(ascending=False)
         up_down_zero_df = up_down_zero_df.sort_values(by='상승 확률 높은 순위')
+        up_down_zero_df = up_down_zero_df.reset_index(drop=True)
         return up_down_zero_df
 # ------------------------------- 듀얼 모멘텀 함수들 -----------------------------#
-    # 홀딩 리스트 가져오기
-    def getHoldingsList(indexName):
-        stocks = list(fdr.StockListing(indexName)['Symbol'] )# 나스닥
-        return stocks[:30] # 갯수 바꿀 수 있음!!
 
-    # stock_dual = Strategies.getHoldingsList('KOSPI')
+    @staticmethod
+    def get_holding_list(index_name):
+        """
+        홀딩 리스트 가져오기
+        :param index_name: 
+        :return: 
+        """
+        _stocks = list(fdr.StockListing(index_name)['Symbol'])  # 나스닥
+        return _stocks[:30]  # 갯수 바꿀 수 있음!!
 
-    # 리스트를 데이터프레임으로 바꾸기
-    def getCloseDatafromList(stock_dual, start_date):
+    # stock_dual = Strategies.get_holding_list('KOSPI')
+
+    # noinspection PyPep8Naming
+    @staticmethod
+    def getCloseDatafromList(start_date):
+        """
+        시작일로부터 현재까지의 종가 정보 조회
+        :param start_date: 
+        :return: DataFrame=index(날짜:y-m-d), columns(tickers)
+        """
         df = pd.DataFrame()
-        for s in Strategies.getHoldingsList('KOSPI'):
-            df[s] = fdr.DataReader(s, start_date)['Close']
+        # for s in Strategies.get_holding_list('KOSPI'):
+        stocklist = get_stocks()
+        for i, s in stocklist.iterrows():
+            ticker = s[0]
+            df[ticker] = fdr.DataReader(ticker, start_date)['Close']
+            # s = fdr.DataReader(_code, start_date)['Close'].rename(_code)
+            # df = pd.concat([df, s], axis=1)
         return df
 
     # prices = Strategies.getCloseDatafromList(stock_dual, '2021-01-01')
 
-    # 현재 듀얼 모멘텀으로 어떤 주식을 사야 하는지 리스트화
-    def bool_converter(bool_var):
-        """Returns Integer Value from Boolean Value
-        Parameters
-        ----------
-        bool_var : boolean
-            Boolean variables representing trade signals
-        Returns
-        -------
-        result : int
-            Integer variables representing trade signals
+    @staticmethod
+    def dual_momentum(prices, lookback_period, n_selection):
         """
-        if bool_var == True:
-            result = 1
-        elif bool_var == False:
-            result = 0
-        return result
-
-
-    def DualMomentum(prices, lookback_period, n_selection):
-        # lookback_period: 몇개월 모멘텀 이용할건지
-        # n_selection: Top 몇개의 종목을 선택할건지(상대모멘텀)
+        Dual Momentum
+        :param prices: 가격을 갖고 있는 데이터프레임 (index:날짜, columns:티커)
+        :param lookback_period: 몇개월 모멘텀 이용할건지
+        :type lookback_period: int
+        :param n_selection: Top 몇개의 종목을 선택할건지(상대모멘텀)
+        :type n_selection: int
+        :return: list
+        """
 
         # absolute momentum
-        returns = prices.pct_change(periods=lookback_period).fillna(0) # return 값이 true or false 로 나옴.
-        long_signal = (returns > 0).applymap(Strategies.bool_converter) # applymap :dataframe.applymap(func) 괄호 없애야 함.  # 리턴값이 양수가 맞으면 1로 바꿔라
+        returns = prices.pct_change(periods=lookback_period).fillna(0)  # return 값이 true or false 로 나옴.
+        long_signal = (returns > 0).applymap(bool_converter)  # applymap :dataframe.applymap(func) 괄호 없애야 함.  # 리턴값이 양수가 맞으면 1로 바꿔라
         abs_signal = long_signal[-1:]
 
         # relative momentum
         returns = prices.pct_change(periods=lookback_period).fillna(0)
         rank = returns.rank(axis=1, ascending=False)
-        long_signal = (rank <= n_selection).applymap(Strategies.bool_converter)
+        long_signal = (rank <= n_selection).applymap(bool_converter)
         rel_signal = long_signal[-1:]
 
         # Dual momentum
-        signal = (abs_signal == rel_signal).applymap(Strategies.bool_converter) * abs_signal
+        # noinspection PyUnresolvedReferences
+        signal = (abs_signal == rel_signal).applymap(bool_converter) * abs_signal
         dual_momentum_list = list(signal[signal == 1].dropna(axis=1).columns)
         return dual_momentum_list

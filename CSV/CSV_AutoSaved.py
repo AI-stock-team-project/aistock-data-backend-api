@@ -1,41 +1,68 @@
-###################### CSV 만들어서 저장하는 파일 ####################
+# ##################### CSV 만들어서 저장하는 파일 ####################
 import pandas as pd
-import warnings
-warnings.filterwarnings(action='ignore')
-from Class_Strategies import Strategies as st
 import csv
+from Class_Strategies import Strategies as st
+from Class_Strategies import get_stocks
+import time
+from datetime import timedelta
 
-####################### 급등주 ############################
-speedy_rising_volume_list_df = pd.DataFrame({'speedy_rising_volume_list':st.run()})
-speedy_rising_volume_list_df.to_csv("speedy_rising_volume_list_df.csv")
 
-#################### 모멘텀 1 mo #########################
-momentum_1month_rank  = st.momentum_1month()
+# ################### Dual Momentum #######################
+start = time.time()
+print("Dual Momentum csv")
+# stock_dual = st.get_holding_list('KOSPI')
+stock_dual = get_stocks()
+prices = st.getCloseDatafromList('2021-01-01')
+dualmomentumlist = st.dual_momentum(prices, lookback_period=20, n_selection=len(stock_dual) // 2)
+
+with open('dualmomentumlist.csv', 'w') as file:
+    write = csv.writer(file)
+    write.writerow(dualmomentumlist)
+print(timedelta(seconds=(time.time() - start)))
+
+
+# ################### 모멘텀 1 mo #########################
+start = time.time()
+print("모멘텀 1 csv")
+
+momentum_1month_rank = st.momentum_1month()
 momentum_1mo_assets = momentum_1month_rank.index[:30]
 
-with open('momentum_1mo_assets.csv','w') as file:
+# momentum_1mo_assets.to_csv('momentum_1mo_assets.csv')
+with open('momentum_1mo_assets.csv', 'w') as file:
     write = csv.writer(file)
     write.writerow(momentum_1mo_assets)
 
-#################### 모멘텀 3개월 ##########################
-momentum_3months_rank  = st.momentum_3months()
+print(timedelta(seconds=(time.time() - start)))
+
+
+# ################### 모멘텀 3개월 ##########################
+start = time.time()
+print("모멘텀 3 csv")
+momentum_3months_rank = st.momentum_3months()
 momentum_3mos_assets = momentum_3months_rank.index[:30]
 
-with open('momentum_3mos_assets.csv','w') as file:
+with open('momentum_3mos_assets.csv', 'w') as file:
     write = csv.writer(file)
     write.writerow(momentum_3mos_assets)
 
-#################### Dual Momentum #######################
-stock_dual = st.getHoldingsList('KOSPI')
-prices = st.getCloseDatafromList(stock_dual, '2021-01-01')
-dualmomentumlist = st.DualMomentum(prices, lookback_period = 20, n_selection = len(stock_dual)//2)
+print(timedelta(seconds=(time.time() - start)))
 
-with open('dualmomentumlist.csv','w') as file:
-    write = csv.writer(file)
-    write.writerow(dualmomentumlist)
 
-##################### 하루 상승빈도 ########################
+# ###################### 급등주 ############################
+start = time.time()
+print("급등주 csv")
+
+speedy_rising_volume_list_df = pd.DataFrame({'speedy_rising_volume_list': st.run()})
+speedy_rising_volume_list_df.to_csv("speedy_rising_volume_list_df.csv")
+
+print(timedelta(seconds=(time.time() - start)))
+
+
+# #################### 하루 상승빈도 ########################
+start = time.time()
+print("하루 상승빈도 csv")
 up_down_zero_df = st.get_up_down_zero_df()
 up_down_zero_df.to_csv("up_down_zero_df.csv")
-
-## 대충 10분 혹은 그 이상 정도 걸림 ##
+print(timedelta(seconds=(time.time() - start)))
+# # 대충 10분 혹은 그 이상 정도 걸림 ##
