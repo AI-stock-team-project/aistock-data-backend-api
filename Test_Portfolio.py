@@ -21,18 +21,21 @@ def test():
         # custom_assets=custom_assets
     )
     """
+    # a = AssetMethod.DUAL
+    # print(a)
+
     test_custom_eff()
-    test_custom_sharp()
-    test_dual_eff()
-    test_dual_sharp()
-    test_instant_eff()
-    test_instant_sharp()
-    test_mo1_eff()
-    test_mo1_sharp()
-    test_mo3_eff()
-    test_mo3_eff()
-    test_up_eff()
-    test_up_sharp()
+    # test_custom_sharp()
+    # test_dual_eff()
+    # test_dual_sharp()
+    # test_instant_eff()
+    # test_instant_sharp()
+    # test_mo1_eff()
+    # test_mo1_sharp()
+    # test_mo3_eff()
+    # test_mo3_eff()
+    # test_up_eff()
+    # test_up_sharp()
 
 
 def test_custom_eff():
@@ -44,9 +47,9 @@ def test_custom_eff():
     custom_assets = ['005930', '000660', '035720', '035420', '051910']
 
     make_portfolio(
-        optimize=optimize_method,
+        optimize_method=optimize_method,
         asset_method=asset_method,
-        year=year,
+        years=year,
         money=money,
         risk_limit=risk_limit,
         custom_assets=custom_assets
@@ -62,9 +65,9 @@ def test_custom_sharp():
     custom_assets = ['005930', '000660', '035720', '035420', '051910']
 
     make_portfolio(
-        optimize=optimize_method,
+        optimize_method=optimize_method,
         asset_method=asset_method,
-        year=year,
+        years=year,
         money=money,
         risk_limit=risk_limit,
         custom_assets=custom_assets
@@ -79,9 +82,9 @@ def test_dual_eff():
     risk_limit = 0.3
 
     make_portfolio(
-        optimize=optimize_method,
+        optimize_method=optimize_method,
         asset_method=asset_method,
-        year=year,
+        years=year,
         money=money,
         risk_limit=risk_limit,
     )
@@ -95,9 +98,9 @@ def test_dual_sharp():
     risk_limit = 0.3
 
     make_portfolio(
-        optimize=optimize_method,
+        optimize_method=optimize_method,
         asset_method=asset_method,
-        year=year,
+        years=year,
         money=money,
         risk_limit=risk_limit,
     )
@@ -111,9 +114,9 @@ def test_instant_eff():
     risk_limit = 0.3
 
     make_portfolio(
-        optimize=optimize_method,
+        optimize_method=optimize_method,
         asset_method=asset_method,
-        year=year,
+        years=year,
         money=money,
         risk_limit=risk_limit,
     )
@@ -127,9 +130,9 @@ def test_instant_sharp():
     risk_limit = 0.3
 
     make_portfolio(
-        optimize=optimize_method,
+        optimize_method=optimize_method,
         asset_method=asset_method,
-        year=year,
+        years=year,
         money=money,
         risk_limit=risk_limit,
     )
@@ -143,109 +146,91 @@ def test_mo1_eff():
     risk_limit = 0.3
 
     make_portfolio(
-        optimize=optimize_method,
+        optimize_method=optimize_method,
         asset_method=asset_method,
-        year=year,
+        years=year,
         money=money,
         risk_limit=risk_limit,
     )
 
 
 def test_mo1_sharp():
-    optimize_method = OptimizeMethod.Efficient
-    asset_method = AssetMethod.DUAL
+    optimize_method = OptimizeMethod.MaxSharp
+    asset_method = AssetMethod.MOMENTUM_1MONTH
     year = 3
     money = 15 * 1000000
     risk_limit = 0.3
-    # custom_assets = ['005930', '000660', '035720', '035420', '051910']
-
-    # print(asset_method)
 
     make_portfolio(
-        optimize=optimize_method,
+        optimize_method=optimize_method,
         asset_method=asset_method,
-        year=year,
+        years=year,
         money=money,
         risk_limit=risk_limit,
-        # custom_assets=custom_assets
     )
 
 
 def test_mo3_eff():
     optimize_method = OptimizeMethod.Efficient
-    asset_method = AssetMethod.DUAL
+    asset_method = AssetMethod.MOMENTUM_3MONTH
     year = 3
     money = 15 * 1000000
     risk_limit = 0.3
-    # custom_assets = ['005930', '000660', '035720', '035420', '051910']
-
-    # print(asset_method)
 
     make_portfolio(
-        optimize=optimize_method,
+        optimize_method=optimize_method,
         asset_method=asset_method,
-        year=year,
+        years=year,
         money=money,
         risk_limit=risk_limit,
-        # custom_assets=custom_assets
     )
 
+
 def test_mo3_sharp():
-    optimize_method = OptimizeMethod.Efficient
-    asset_method = AssetMethod.DUAL
+    optimize_method = OptimizeMethod.MaxSharp
+    asset_method = AssetMethod.MOMENTUM_3MONTH
     year = 3
     money = 15 * 1000000
     risk_limit = 0.3
-    # custom_assets = ['005930', '000660', '035720', '035420', '051910']
-
-    # print(asset_method)
 
     make_portfolio(
-        optimize=optimize_method,
+        optimize_method=optimize_method,
         asset_method=asset_method,
-        year=year,
+        years=year,
         money=money,
         risk_limit=risk_limit,
-        # custom_assets=custom_assets
     )
 
 
 def test_up_eff():
     optimize_method = OptimizeMethod.Efficient
-    asset_method = AssetMethod.DUAL
+    asset_method = AssetMethod.DATE_COUNT
     year = 3
     money = 15 * 1000000
     risk_limit = 0.3
-    # custom_assets = ['005930', '000660', '035720', '035420', '051910']
-
-    # print(asset_method)
 
     make_portfolio(
-        optimize=optimize_method,
+        optimize_method=optimize_method,
         asset_method=asset_method,
-        year=year,
+        years=year,
         money=money,
         risk_limit=risk_limit,
-        # custom_assets=custom_assets
     )
 
+
 def test_up_sharp():
-    optimize_method = OptimizeMethod.Efficient
-    asset_method = AssetMethod.DUAL
+    optimize_method = OptimizeMethod.MaxSharp
+    asset_method = AssetMethod.DATE_COUNT
     year = 3
     money = 15 * 1000000
     risk_limit = 0.3
-    # custom_assets = ['005930', '000660', '035720', '035420', '051910']
-
-    # print(asset_method)
 
     make_portfolio(
-        optimize=optimize_method,
+        optimize_method=optimize_method,
         asset_method=asset_method,
-        year=year,
+        years=year,
         money=money,
         risk_limit=risk_limit,
-        # custom_assets=custom_assets
     )
 
 

@@ -44,7 +44,7 @@ class AssetMethod(Enum):
 
     def __str__(self):
         if self.value == self.CUSTOM.value:
-            return ''
+            return 'Custom'
         elif self.value == self.DUAL.value:
             return 'Dual Momentum'
         elif self.value == self.SOARING.value:
@@ -93,19 +93,23 @@ def get_assets(method, custom_assets=None):
     return assets
 
 
-def make_portfolio(optimize=OptimizeMethod.Efficient, asset_method=AssetMethod.DUAL,
-                   year=3, money=15000000, risk_limit=0.3, custom_assets=None):
-    # ============== 파라미터 부분 ==============
-    # 포트폴리오 최적화 방법 선택
-    opt_method = OptimizeMethod.Efficient
-    # 종목 가져오는 방법 선택
-    asset_method = AssetMethod.DUAL
-    # 투자 기간
-    param_year = 3
-    # 투자 금액 (샘플로 1.5천만)
-    param_money = 15 * 1000000
+def make_portfolio(optimize_method=OptimizeMethod.Efficient, asset_method=AssetMethod.DUAL,
+                   years=3, money=15000000, risk_limit=0.3, custom_assets=None):
+    """
+
+    :param optimize_method: 포트폴리오 최적화 방법 선택
+    :param asset_method: 종목 가져오는 방법 선택
+    :param years: 투자 기간
+    :param money: 투자 금액
+    :param risk_limit: 감당 리스크
+    :param custom_assets: 종목을 선택해서 넘겨받을 때. 기본값은 None
+    :return:
+    """
+    # ============= 파라미터 조정 ===========
+    # 투자 금액
+    param_money = money
     # 감당 리스크
-    param_risk_limit = 0.3
+    param_risk_limit = risk_limit
 
     # ============== 구문 시작 ==============
     kospi_temp = fdr.StockListing('KOSPI')[['Symbol', 'Name']]
@@ -117,7 +121,7 @@ def make_portfolio(optimize=OptimizeMethod.Efficient, asset_method=AssetMethod.D
     assets = get_assets(asset_method, custom_assets)
 
     # 기간 설정
-    start_date = datetime.datetime.today() - relativedelta(years=param_year)
+    start_date = datetime.datetime.today() - relativedelta(years=years)
     start_date = start_date.strftime('%Y%m%d')
     today = datetime.datetime.today().strftime("%Y%m%d")
     end_date = today
@@ -135,11 +139,11 @@ def make_portfolio(optimize=OptimizeMethod.Efficient, asset_method=AssetMethod.D
     # print(plotting.plot_covariance(S))
 
     # 포폴 최적화
-    if opt_method == OptimizeMethod.MaxSharp:
+    if optimize_method == OptimizeMethod.MaxSharp:
         # 포폴 최적화 (Max sharp ratio)
         ef = EfficientFrontier(mu, S, solver="SCS")
         weights = ef.max_sharpe()
-    elif opt_method == OptimizeMethod.Efficient:
+    elif optimize_method == OptimizeMethod.Efficient:
         # 포폴 최적화 (Efficient Risk)
         vol_limit = param_risk_limit
         ef = EfficientFrontier(mu, S, solver="SCS")
@@ -162,7 +166,7 @@ def make_portfolio(optimize=OptimizeMethod.Efficient, asset_method=AssetMethod.D
     inv_total_price = {}
     for i in allocation.keys():
         inv_total_price[i] = latest_prices.loc[i] * allocation[i]
-    inv_total_price
+    print(inv_total_price)
 
     # 총 투자금액
     investment = 0
@@ -239,6 +243,7 @@ def make_portfolio(optimize=OptimizeMethod.Efficient, asset_method=AssetMethod.D
     # 1에서 시작해서, 전일대비 변동률(수익률)을 적용하여 수치화하기
     wealth = (1 + result).cumprod()
 
+    # ############ --------- 시각화 -------- ############
     # 포트폴리오와 KOSPI 지수의 '누적 수익률 추이'를 시각화하여 비교
     # matplotlib.pyplot 스타일시트 설정
     plt.style.use('fivethirtyeight')
@@ -276,8 +281,8 @@ def make_portfolio(optimize=OptimizeMethod.Efficient, asset_method=AssetMethod.D
     plt.grid(True)
     plt.savefig('votality_trends.png', dpi=100)
     plt.show()
-
-    print('----- Momentum 1month sharpe portfolio performance -----')
+    # ############# ------------print------------- #####################
+    print('----- Speedy rising portfolio performance -----')
     # Show Funds
     print('Funds:', portfolio_val, 'KRW')
 
@@ -285,6 +290,6 @@ def make_portfolio(optimize=OptimizeMethod.Efficient, asset_method=AssetMethod.D
     print('Funds Remaining: ', leftover, ' KRW')
 
     # Show Portfolio performance
-    ef.portfolio_performance(verbose=True)
+    print(ef.portfolio_performance(verbose=True))
     rmse = da._allocation_rmse_error(verbose=False)
     print(rmse)
