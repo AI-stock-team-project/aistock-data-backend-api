@@ -24,3 +24,4 @@ venv.bak/
 *.env
 *.png
 *.db
+activate.cmd

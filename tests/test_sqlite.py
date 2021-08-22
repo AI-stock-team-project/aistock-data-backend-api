@@ -1,11 +1,8 @@
 # from CSV.Class_Strategies import Strategies as st
 # from CSV.Class_Strategies import get_stocks
 # import pandas as pd
-import FinanceDataReader as fdr
-from pykrx import stock
-from datetime import datetime, timedelta
 # from sqlalchemy import create_engine
-import StockSqlite
+from aistock import StockReader
 
 
 def test():
@@ -19,15 +16,15 @@ def test():
 
 
 def test_fetch_stock_prices():
-    StockSqlite.fetch_prices_by_ticker('095570', '2021-08-01')
+    StockReader.fetch_prices_by_ticker('095570', '2021-08-01')
 
 
 def test_build_close_price():
-    StockSqlite.build_close_price_database('095570', '2021-01-01')
+    StockReader.build_close_price_database('095570', '2021-01-01')
 
 
 def test_retrieve_prices_by_ticker():
-    df = StockSqlite.retrieve_prices_by_ticker('095570', '2021-01-01')
+    df = StockReader.retrieve_prices_by_ticker('095570', '2021-01-01')
     # print(type(df.index))
     print(df)
 
@@ -44,7 +41,7 @@ def test_get_stock_close_prices():
     symbol = '095570'
     date = '2021-05-20'
 
-    df = StockSqlite.get_stock_close_price(symbol, date)
+    df = StockReader.get_stock_close_price(symbol, date)
     print(type(df.index))
     print(df)
 
