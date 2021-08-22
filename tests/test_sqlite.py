@@ -1,15 +1,11 @@
-from Class_Strategies import Strategies as st
-from Class_Strategies import get_stocks
-import pandas as pd
+# from CSV.Class_Strategies import Strategies as st
+# from CSV.Class_Strategies import get_stocks
+# import pandas as pd
 import FinanceDataReader as fdr
 from pykrx import stock
 from datetime import datetime, timedelta
 # from sqlalchemy import create_engine
 import StockSqlite
-
-
-sqlite_file = '../CSV/test.db'
-table_name = 'stock_price_close'
 
 
 def test():
@@ -18,19 +14,26 @@ def test():
     :return: 
     """
     # test_build_close_price()
-    test_get_stock_close_prices()
+    # test_fetch_stock_prices()
+    test_retrieve_prices_by_ticker()
+
+
+def test_fetch_stock_prices():
+    StockSqlite.fetch_prices_by_ticker('095570', '2021-08-01')
 
 
 def test_build_close_price():
     StockSqlite.build_close_price_database('095570', '2021-01-01')
 
 
-def test_insert_close_price_stock():
-    """
-    데이터베이스에 값을 넣는 경우
-    :return: 
-    """
-    StockSqlite.load_stock_close_prices('095570', '2021-01-01')
+def test_retrieve_prices_by_ticker():
+    df = StockSqlite.retrieve_prices_by_ticker('095570', '2021-01-01')
+    # print(type(df.index))
+    print(df)
+
+
+def test_get_stock_prices():
+    pass
 
 
 def test_get_stock_close_prices():
