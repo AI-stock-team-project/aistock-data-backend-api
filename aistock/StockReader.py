@@ -1,5 +1,6 @@
 import datetime
-# from datetime import timedelta
+import time
+from datetime import timedelta
 import FinanceDataReader as fdr
 import pandas as pd
 from deprecated import deprecated
@@ -151,7 +152,8 @@ def read_prices_by_ticker_fdr(ticker: str, start_date: str, end_date=None) -> Da
 
 def read_prices_by_ticker_pykrx(ticker: str, start_date: str, end_date=None) -> DataFrame:
     """
-    한 종목의 가격 정보를 조회 [PyKrx 이용]
+    한 종목의 가격 정보를 조회
+    [PyKrx 이용]
     :param ticker: 종목코드
     :param start_date: 조회 시작일자 (yyyy-mm-dd)
     :param end_date: 조회 끝일자 (yyyy-mm-dd)
@@ -171,6 +173,61 @@ def read_prices_by_ticker_pykrx(ticker: str, start_date: str, end_date=None) -> 
         inplace=True)
     df.index.name = COL_DATE
     df.insert(0, COL_TICKER, ticker)
+    return df
+
+
+def read_prices_by_date(date) -> DataFrame:
+    """
+    주식 가격 조회.
+    [pykrx 이용]
+    :param date: 기준 날짜
+    :return: DataFrame
+    """
+    print(f"get_stockprices_by_date ({date})")
+    # df = pd.DataFrame()
+    date = f'{date[:4]}{date[5:7]}{date[8:10]}'
+    df = stock.get_market_ohlcv_by_ticker(date, 'ALL')
+    col_map = {
+        '시가': COL_OPEN,
+        '고가': COL_HIGH,
+        '저가': COL_LOW,
+        '종가': COL_CLOSE,
+        '거래량': COL_VOLUME,
+        '거래대금': 'trad_value',
+        '등락률': 'fluc_rate'
+    }
+    df.rename(
+        columns=col_map,
+        inplace=True)
+    df.index.name = COL_TICKER
+    df.insert(0, COL_DATE, date)
+    return df
+
+
+def read_prices_by_date_all(start_date: str, end_date: str) -> DataFrame:
+    """
+    특정 날짜부터 해당 날짜 까지의 주식 가격 정보를 조회.
+    :return: DataFrame<br>
+        Symbol      Date  Open  High  Low  Close  Volume  trad_value  fluc_rate<br>
+    0     060310  20210502     0     0    0      0       0           0        0.0<br>
+    1     095570  20210502     0     0    0      0       0           0        0.0<br>
+    2     006840  20210502     0     0    0      0       0           0        0.0
+
+    """
+    df = pd.DataFrame()
+    days = (datetime.date.fromisoformat(end_date) - datetime.date.fromisoformat(start_date)).days
+    if days < 1:
+        return pd.DataFrame()
+    date = datetime.date.fromisoformat(start_date)
+    for i in range(days):
+        t_df = read_prices_by_date(date.strftime('%Y-%m-%d'))
+        date += timedelta(days=1)
+        # print(t_df)
+        # df.append(t_df)
+        df = pd.concat([df, t_df])
+        # 혹시 모르니까 sleep 추가
+        time.sleep(1)
+    df.reset_index(inplace=True)
     return df
 
 
