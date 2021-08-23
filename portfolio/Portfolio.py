@@ -66,19 +66,19 @@ def get_assets(method, custom_assets=None):
         # assets = ['005930', '000660', '035720', '035420', '051910']
         return custom_assets
     elif method == AssetMethod.DUAL:
-        assets = pd.read_csv('CSV/dualmomentumlist.csv')  # np.array(dualmomentumlist)
+        assets = pd.read_csv('../CSV/dualmomentumlist.csv')  # np.array(dualmomentumlist)
     elif method == AssetMethod.SOARING:
-        df = pd.read_csv('CSV/speedy_rising_volume_list_df.csv')
+        df = pd.read_csv('../CSV/speedy_rising_volume_list_df.csv')
         df['speedy_rising_volume_list'] = df[
             'speedy_rising_volume_list'].apply(lambda x: '{0:0>6}'.format(x))
         asset = df['speedy_rising_volume_list']
         assets = np.array(asset.values)
     elif method == AssetMethod.MOMENTUM_1MONTH:
-        assets = pd.read_csv('CSV/momentum_1mo_assets.csv')
+        assets = pd.read_csv('../CSV/momentum_1mo_assets.csv')
     elif method == AssetMethod.MOMENTUM_3MONTH:
-        assets = pd.read_csv('CSV/momentum_3mos_assets.csv')
+        assets = pd.read_csv('../CSV/momentum_3mos_assets.csv')
     elif method == AssetMethod.DATE_COUNT:
-        up_down_zero_df = pd.read_csv("CSV/up_down_zero_df.csv")
+        up_down_zero_df = pd.read_csv("../CSV/up_down_zero_df.csv")
         up_down_zero_df.index = up_down_zero_df['Unnamed: 0']
         up_down_zero_df = up_down_zero_df.drop('Unnamed: 0', axis=1)
         idx_list = up_down_zero_df.index[:30]

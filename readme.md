@@ -42,4 +42,5 @@ docker build --force-rm --no-cache -t aistock-stockdata-api .
 docker run --env-file ./.local.env --name aistock-stockdata-api -d -p 26000:5000 -v "%cd%:/app" aistock-stockdata-api
 ```
 
-
+# 내부적인 코드
+* update_stock_list.py : 데이터베이스 테이블의 종목 목록을 갱신함.

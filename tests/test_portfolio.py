@@ -1,4 +1,4 @@
-from Portfolio import make_portfolio, OptimizeMethod, AssetMethod
+from portfolio.Portfolio import make_portfolio, OptimizeMethod, AssetMethod
 
 
 def test():

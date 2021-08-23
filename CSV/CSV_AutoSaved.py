@@ -7,20 +7,6 @@ import time
 from datetime import timedelta
 
 
-# ################### Dual Momentum #######################
-start = time.time()
-print("Dual Momentum csv")
-# stock_dual = st.get_holding_list('KOSPI')
-stock_dual = get_stocks()
-prices = st.getCloseDatafromList('2021-01-01')
-dualmomentumlist = st.dual_momentum(prices, lookback_period=20, n_selection=len(stock_dual) // 2)
-
-with open('dualmomentumlist.csv', 'w') as file:
-    write = csv.writer(file)
-    write.writerow(dualmomentumlist)
-print(timedelta(seconds=(time.time() - start)))
-
-
 # ################### 모멘텀 1 mo #########################
 start = time.time()
 print("모멘텀 1 csv")
@@ -66,3 +52,17 @@ up_down_zero_df = st.get_up_down_zero_df()
 up_down_zero_df.to_csv("up_down_zero_df.csv")
 print(timedelta(seconds=(time.time() - start)))
 # # 대충 10분 혹은 그 이상 정도 걸림 ##
+
+
+# ################### Dual Momentum #######################
+start = time.time()
+print("Dual Momentum csv")
+# stock_dual = st.get_holding_list('KOSPI')
+stock_dual = get_stocks()
+prices = st.getCloseDatafromList('2021-01-01')
+dualmomentumlist = st.dual_momentum(prices, lookback_period=20, n_selection=len(stock_dual) // 2)
+
+with open('dualmomentumlist.csv', 'w') as file:
+    write = csv.writer(file)
+    write.writerow(dualmomentumlist)
+print(timedelta(seconds=(time.time() - start)))
