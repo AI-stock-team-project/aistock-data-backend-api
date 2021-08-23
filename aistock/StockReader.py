@@ -1,6 +1,5 @@
-import sqlite3
-from datetime import datetime
-
+import datetime
+# from datetime import timedelta
 import FinanceDataReader as fdr
 import pandas as pd
 from deprecated import deprecated
@@ -34,16 +33,16 @@ def read_tickerlist_to_list_pykrx() -> list:
     'pykrx' 사용
     :return: list 종목 코드 목록
     """
-    today = datetime.today().strftime("%Y%m%d")
+    today = datetime.datetime.today().strftime("%Y%m%d")
     tickers = stock.get_market_ticker_list(today, market='KOSDAQ')
     tickers2 = stock.get_market_ticker_list(today, market='KOSPI')
     tickers.extend(tickers2)
     return list(tickers)
 
 
-class StockCustomCol:
+class StockKrxCols:
     FULL_CODE = 'FullCode'
-    SHORT_CODE = 'Symbol'
+    CODE = 'Code'
     SYMBOL = 'Symbol'
     NAME = 'Name'
     MARKET = 'Market'
@@ -51,26 +50,40 @@ class StockCustomCol:
     MARKET_CODE = 'MarketCode'
 
 
-def read_stocklist_by_market():
+def read_stocklist_by_market() -> DataFrame:
     """
-    FinanceDataReader/krx/listing.py 에서 개선
+    라이브러리 없이 바로 주식 종목을 가져오는 기능 구현
+    FinanceDataReader/krx/listing.py 을 참조해서 개선
+    왠지 갯수가 안 맞는데?
+
+    :return: 종목 목록 데이터프레임<br>
+        FullCode	Code	Name	MarketCode	MarketName	Market	Symbol<br>
+    0	KR7060310000	060310	3S	KSQ	코스닥	KOSDAQ	060310<br>
+    1	KR7095570008	095570	AJ네트웍스	STK	유가증권	KOSPI	095570<br>
+    2	KR7006840003	006840	AK홀딩스	STK	유가증권	KOSPI	006840
     """
     bld = 'dbms/comm/finder/finder_stkisu'
     r = requests.post('http://data.krx.co.kr/comm/bldAttendant/getJsonData.cmd', data={'bld': bld})
     jo = json.loads(r.text)
-    df_finder = json_normalize(jo, 'block1')
-    df_finder = df_finder.rename(columns={
-        'full_code': StockCustomCol.FULL_CODE,
-        'short_code': StockCustomCol.SHORT_CODE,
-        'codeName': StockCustomCol.NAME,
-        'marketCode': StockCustomCol.MARKET_CODE,
-        'marketName': StockCustomCol.MARKET_NAME,
-        'marketEngName': StockCustomCol.MARKET,
-        'ord1': 'ord1',
-        'ord2': 'ord2',
+    """
+    (KRX에서 로드된 데이터)
+        full_code	short_code	codeName	marketCode	marketName	marketEngName	ord1	ord2
+    0	KR7060310000	060310	3S	KSQ	코스닥	KOSDAQ		16
+    1	KR7095570008	095570	AJ네트웍스	STK	유가증권	KOSPI		16
+    2	KR7006840003	006840	AK홀딩스	STK	유가증권	KOSPI		16
+    """
+    df = json_normalize(jo, 'block1')
+    df = df.rename(columns={
+        'full_code': StockKrxCols.FULL_CODE,
+        'short_code': StockKrxCols.CODE,
+        'codeName': StockKrxCols.NAME,
+        'marketCode': StockKrxCols.MARKET_CODE,
+        'marketName': StockKrxCols.MARKET_NAME,
+        'marketEngName': StockKrxCols.MARKET,
     })
-    df_finder.drop(['ord1', 'ord2'], inplace=True, axis=1)
-    return df_finder
+    df[StockKrxCols.SYMBOL] = df[StockKrxCols.CODE]
+    df.drop(['ord1', 'ord2'], inplace=True, axis=1)
+    return df
 
 
 def read_stock_list_pykrx_fundamental() -> list:
@@ -78,7 +91,7 @@ def read_stock_list_pykrx_fundamental() -> list:
     종목을 조회하는 함수. pykrx를 통해서 로드함.
     :return: 종목 코드 목록 (DataFrame)
     """
-    today = datetime.today().strftime("%Y%m%d")
+    today = datetime.datetime.today().strftime("%Y%m%d")
     kospi = stock.get_market_fundamental_by_ticker(today, market="KOSPI").index
     kosdaq = stock.get_market_fundamental_by_ticker(today, market="KOSDAQ").index
     stocks = kospi.append(kosdaq)
@@ -151,7 +164,7 @@ def read_prices_by_ticker_pykrx(ticker: str, start_date: str, end_date=None) -> 
     if end_date is not None:
         df = stock.get_market_ohlcv_by_date(start_date, end_date, ticker)
     else:
-        today = datetime.today().strftime("%Y%m%d")
+        today = datetime.datetime.today().strftime("%Y%m%d")
         df = stock.get_market_ohlcv_by_date(start_date, today, ticker)
     df.rename(
         columns={'시가': COL_OPEN, '고가': COL_HIGH, '저가': COL_LOW, '종가': COL_CLOSE, '거래량': COL_VOLUME},
@@ -175,5 +188,3 @@ def read_stock_close_prices(ticker='095570', date='2021-01-01'):
     df[COL_CLOSE] = fdr.DataReader(ticker, date)['Close']
     df[COL_TICKER] = ticker
     return df
-
-

@@ -8,6 +8,7 @@ entrypoint.sh 와 연관이 되므로, 파일명을 변경하지는 말 것.
 # noinspection PyPep8Naming
 import aistock.database as aistock_database
 import aistock.StockReader as StockReader
+from aistock.StockReader import StockKrxCols
 
 
 class StockTable:
@@ -25,28 +26,37 @@ class StockTempTable:
     table_name = 'stock_list_temp'
 
     class Cols:
-        code_isin = 'FullCode'
-        code = 'Symbol'
-        symbol = 'Symbol'
-        name = 'Name'
-        market = 'Market'
+        code_isin = 'code_isin'
+        code = 'code'
+        symbol = 'symbol'
+        name = 'name'
+        market = 'market'
 
 
 def update_stock_list():
     """
     종목 리스트를 데이터베이스에 저장 및 적용하는 기능
     """
-    use_fetch = False
+    use_update = True
 
     # 디비 커넥션
     engine = aistock_database.connect()
 
     df = StockReader.read_stocklist_by_market()
+    df = df.rename(columns={
+        StockKrxCols.FULL_CODE: StockTempTable.Cols.code_isin,
+        StockKrxCols.SYMBOL: StockTempTable.Cols.symbol,
+        StockKrxCols.CODE: StockTempTable.Cols.code,
+        StockKrxCols.NAME: StockTempTable.Cols.name,
+        StockKrxCols.MARKET: StockTempTable.Cols.market
+    })
+    # 불필요한 컬럼 제거
+    df.drop([StockKrxCols.MARKET_NAME], inplace=True, axis=1)
 
     # 데이터 임시 테이블 생성 (테이블이 있을 경우 지우고 새로 작성)
     df.to_sql(con=engine, name=StockTempTable.table_name, if_exists='replace')
 
-    if use_fetch:
+    if use_update:
         # 실제 테이블로 옮기기 위한 작업
         with engine.connect() as connection:
             # 임시 테이블과 비교해서 기존에 없던 신규 내용을 insert
