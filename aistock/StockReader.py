@@ -10,14 +10,25 @@ import requests
 import json
 
 
+# 종목 코드
 COL_TICKER = 'Symbol'
-COL_CLOSE = 'Close'
-COL_OPEN = 'Open'
-COL_HIGH = 'High'
-COL_LOW = 'Low'
-COL_VOLUME = 'Volume'
-COL_CHANGE = 'Change'
+# 기준 일자
 COL_DATE = 'Date'
+# 시가
+COL_OPEN = 'Open'
+# 고가
+COL_HIGH = 'High'
+# 저가
+COL_LOW = 'Low'
+# 종가
+COL_CLOSE = 'Close'
+# 거래량
+COL_VOLUME = 'Volume'
+# 거래대금
+COL_TRAD_VALUE = 'Trad_value'
+# 등락률
+COL_FLUC_RATE = 'Fluc_rate'
+COL_CHANGE = 'Fluc_rate'
 
 
 def read_tickerlist_to_list() -> list:
@@ -181,38 +192,47 @@ def read_prices_by_date(date) -> DataFrame:
     주식 가격 조회.
     [pykrx 이용]
     :param date: 기준 날짜
-    :return: DataFrame
+    :return: DataFrame<br>
+            Open	High	Low	Close	Volume	Trad_value	Fluc_rate<br>
+    Symbol<br>
+    060310	2915	2925	2850	2890	103210	297954910	-0.52<br>
+    095570	5830	5940	5800	5920	44316	261164570	0.68<br>
+    006840	35600	35900	34500	35400	69765	2460513500	-0.56<br>
     """
-    print(f"get_stockprices_by_date ({date})")
+    print(f"read_prices_by_date ({date})")
     # df = pd.DataFrame()
-    date = f'{date[:4]}{date[5:7]}{date[8:10]}'
-    df = stock.get_market_ohlcv_by_ticker(date, 'ALL')
+    w_date = f'{date[:4]}{date[5:7]}{date[8:10]}'
+    df = stock.get_market_ohlcv_by_ticker(w_date, 'ALL')
     col_map = {
         '시가': COL_OPEN,
         '고가': COL_HIGH,
         '저가': COL_LOW,
         '종가': COL_CLOSE,
         '거래량': COL_VOLUME,
-        '거래대금': 'trad_value',
-        '등락률': 'fluc_rate'
+        '거래대금': COL_TRAD_VALUE,
+        '등락률': COL_FLUC_RATE
     }
     df.rename(
         columns=col_map,
         inplace=True)
     df.index.name = COL_TICKER
-    df.insert(0, COL_DATE, date)
-    return df
+    # df.insert(0, COL_DATE, date)
+    if df.iloc[0:15, 0].sum() > 0:
+        # 값이 유효할 때 반환
+        return df
+    else:
+        # 값이 0으로 채워진 경우는, 그냥 빈 DataFrame으로 반환
+        return df[0:0]
 
 
 def read_prices_by_date_all(start_date: str, end_date: str) -> DataFrame:
     """
     특정 날짜부터 해당 날짜 까지의 주식 가격 정보를 조회.
     :return: DataFrame<br>
-        Symbol      Date  Open  High  Low  Close  Volume  trad_value  fluc_rate<br>
-    0     060310  20210502     0     0    0      0       0           0        0.0<br>
-    1     095570  20210502     0     0    0      0       0           0        0.0<br>
-    2     006840  20210502     0     0    0      0       0           0        0.0
-
+        Symbol	Date	Open	High	Low	Close	Volume	Trad_value	Fluc_rate<br>
+    0	060310	2019-05-20	2605	2615	2470	2570	246378	626177635	-1.34<br>
+    1	095570	2019-05-20	5570	5710	5320	5560	58514	322316850	-1.07<br>
+    2	068400	2019-05-20	10750	10750	10350	10400	70136	738017450	-1.89
     """
     df = pd.DataFrame()
     days = (datetime.date.fromisoformat(end_date) - datetime.date.fromisoformat(start_date)).days
@@ -221,10 +241,12 @@ def read_prices_by_date_all(start_date: str, end_date: str) -> DataFrame:
     date = datetime.date.fromisoformat(start_date)
     for i in range(days):
         t_df = read_prices_by_date(date.strftime('%Y-%m-%d'))
-        date += timedelta(days=1)
+        t_df.insert(0, COL_DATE, date)
         # print(t_df)
         # df.append(t_df)
         df = pd.concat([df, t_df])
+        # 날짜를 +1 시킴
+        date += timedelta(days=1)
         # 혹시 모르니까 sleep 추가
         time.sleep(1)
     df.reset_index(inplace=True)

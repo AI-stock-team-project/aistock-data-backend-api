@@ -72,3 +72,4 @@ def build_close_price_database(symbol, date):
                      con=get_engine())
     print(df)
     pass
+

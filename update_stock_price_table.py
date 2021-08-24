@@ -9,6 +9,7 @@ entrypoint.sh 와 연관이 되므로, 파일명을 변경하지는 말 것.
 import aistock.database as aistock_database
 import aistock.StockReader as StockReader
 from aistock.StockReader import StockKrxCols
+import aistock.dateutil as aistock_dateutil
 
 
 class StockPriceTable:
@@ -41,6 +42,9 @@ def update_stock_price():
 
     # 디비 커넥션
     engine = aistock_database.connect()
+    today = aistock_dateutil.today("%Y-%m-%d")
+
+    #
 
     df = StockReader.read_prices_by_date_all('2021-05-02', '2021-05-03')
     print(df)
