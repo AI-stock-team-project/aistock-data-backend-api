@@ -1,8 +1,6 @@
-from aistock import stock_prices_sqlite
-import os
 from datetime import timedelta
 import datetime
-from aistock.stock_prices_sqlite import get_minmax_date, fetch_prices_by_dates_sqlite, SQLITE_PATH
+from aistock.StockPrice import get_minmax_date, fetch_prices_by_dates
 
 
 def update_prices(begin_date: str):
@@ -26,7 +24,7 @@ def update_prices(begin_date: str):
     if min_datetime is None:
         start = begin_datetime
         end = end_datetime
-        fetch_prices_by_dates_sqlite(start.strftime('%Y-%m-%d'), end.strftime('%Y-%m-%d'))
+        fetch_prices_by_dates(start.strftime('%Y-%m-%d'), end.strftime('%Y-%m-%d'))
 
     else:
         if begin_datetime >= min_datetime and max_datetime == end_datetime:
@@ -40,7 +38,7 @@ def update_prices(begin_date: str):
             start = begin_datetime
             end = min_datetime - timedelta(days=1)
             # print(start, end)
-            fetch_prices_by_dates_sqlite(start.strftime('%Y-%m-%d'), end.strftime('%Y-%m-%d'))
+            fetch_prices_by_dates(start.strftime('%Y-%m-%d'), end.strftime('%Y-%m-%d'))
 
         if max_datetime < end_datetime:
             # max 다음날부터 오늘까지 조회 시작
@@ -48,12 +46,10 @@ def update_prices(begin_date: str):
             # end = today
             end = end_datetime
             # print(start, end)
-            fetch_prices_by_dates_sqlite(start.strftime('%Y-%m-%d'), end.strftime('%Y-%m-%d'))
+            fetch_prices_by_dates(start.strftime('%Y-%m-%d'), end.strftime('%Y-%m-%d'))
 
         return True
 
 
-def update():
-    if not os.path.exists(SQLITE_PATH):
-        stock_prices_sqlite.create_table()
+if __name__ == '__main__':
     update_prices('2021-08-24')

@@ -235,7 +235,7 @@ def read_prices_by_dates(start_date: str, end_date: str) -> DataFrame:
     2	068400	2019-05-20	10750	10750	10350	10400	70136	738017450	-1.89
     """
     df = pd.DataFrame()
-    days = (datetime.date.fromisoformat(end_date) - datetime.date.fromisoformat(start_date)).days
+    days = (datetime.date.fromisoformat(end_date) - datetime.date.fromisoformat(start_date)).days + 1
     if days < 1:
         return pd.DataFrame()
     date = datetime.date.fromisoformat(start_date)

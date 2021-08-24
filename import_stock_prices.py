@@ -1,21 +1,14 @@
 """
 """
 # noinspection PyPep8Naming
-import sqlalchemy
-
 import aistock.database as aistock_database
-import aistock.StockReader as StockReader
-from aistock.StockReader import StockKrxCols
-import aistock.dateutil as aistock_dateutil
 import pandas as pd
-from pandas import Series, DataFrame
-import stock_prices_sqlite as sqlite_table
-import aistock.StockPriceTable as StockPriceTable
-from sqlalchemy import Float, Integer, DateTime, String
-
+from pandas import DataFrame
+from aistock import stock_prices_sqlite as sqlite_table
+import aistock.StockPrice as StockPrice
 
 FROM_TABLE = sqlite_table.StockPriceTable
-TO_TABLE = StockPriceTable.Table
+TO_TABLE = StockPrice.Table
 
 
 def load_from_sqlite() -> DataFrame:
