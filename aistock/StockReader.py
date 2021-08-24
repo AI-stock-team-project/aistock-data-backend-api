@@ -189,7 +189,7 @@ def read_prices_by_ticker_pykrx(ticker: str, start_date: str, end_date=None) -> 
 
 def read_prices_by_date(date) -> DataFrame:
     """
-    주식 가격 조회.
+    특정 날짜의 전체 주식 가격 조회. (KOSPI/KOSDAQ/KONEX)
     [pykrx 이용]
     :param date: 기준 날짜
     :return: DataFrame<br>
@@ -225,7 +225,7 @@ def read_prices_by_date(date) -> DataFrame:
         return df[0:0]
 
 
-def read_prices_by_date_all(start_date: str, end_date: str) -> DataFrame:
+def read_prices_by_dates(start_date: str, end_date: str) -> DataFrame:
     """
     특정 날짜부터 해당 날짜 까지의 주식 가격 정보를 조회.
     :return: DataFrame<br>
