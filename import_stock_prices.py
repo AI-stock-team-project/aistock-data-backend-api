@@ -1,6 +1,8 @@
 """
 """
 # noinspection PyPep8Naming
+import sqlalchemy
+
 import aistock.database as aistock_database
 import aistock.StockReader as StockReader
 from aistock.StockReader import StockKrxCols
@@ -41,6 +43,7 @@ def import_from_sqlite():
         },
         inplace=True
     )
+    df[TO_TABLE.fluc_rate] = df[TO_TABLE.fluc_rate].astype('str')
     print(df.dtypes)
 
     df.to_sql(
@@ -48,7 +51,6 @@ def import_from_sqlite():
         con=aistock_database.connect(),
         if_exists='append',
         index=False,
-        dtype={TO_TABLE.fluc_rate: Float}
     )
 
 
