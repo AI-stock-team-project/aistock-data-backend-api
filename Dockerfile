@@ -30,9 +30,17 @@ ENV PATH=/root/.local/bin:$PATH
 # RUN pip install -r requirements.txt
 
 # cron 스케쥴링 추가
-# RUN echo "*/30 * * * * /bin/sh nobody -c 'cd /app/web && /usr/bin/git pull -q origin develop' >>/var/log/cron.log 2>&1" | crontab -
+# RUN echo "*/30 * * * * /bin/sh nobody -c 'cd /app && /usr/bin/git pull -q origin develop' >> /var/log/cron.log 2>&1" | crontab -
+#
+ADD cronjob.sh /etc/cron.d/aistock-cron
+RUN chmod 0644 /etc/cron.d/aistock-cron
+RUN touch /var/log/cron.log
+
+# RUN touch /etc/crontab /etc/cron.*/*
+# RUN service cron start
 
 # working dir
 WORKDIR /app
 
 # ENTRYPOINT [ "python", "-m", "flask", "run", "--host=0.0.0.0" ]
+CMD /usr/sbin/cron -f

@@ -20,5 +20,8 @@ python import_stock_prices.py
 # 주가 정보 가져오기 (최근 것까지)
 python update_stock_price.py
 
+# touch /etc/crontab /etc/cron.*/*
+service cron start
+
 echo "run [data-api] flask server"
 python -m flask run --host=0.0.0.0
