@@ -9,7 +9,7 @@ dockerize -wait tcp://db:3306 -timeout 20s
 
 # web 서버 기다리기
 echo "wait web server"
-dockerize -wait tcp://data-api:5000 -timeout 20s
+dockerize -wait tcp://webapp:8000 -timeout 20s
 
 # create stock data
 python update_stock_table.py
@@ -20,6 +20,5 @@ python import_stock_prices.py
 # 주가 정보 가져오기 (최근 것까지)
 python update_stock_price.py
 
-# echo "run django server"
-# python manage.py runserver 0.0.0.0:8000
+echo "run [data-api] flask server"
 python -m flask run --host=0.0.0.0

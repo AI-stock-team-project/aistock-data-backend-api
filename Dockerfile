@@ -1,3 +1,9 @@
+FROM python:3.9.6-buster AS builder
+COPY requirements.txt .
+
+# requirements.txt를 복사함. 
+RUN pip install --user -r requirements.txt
+
 # slim-buster 는 데비안의 경량화 버전을 말함
 FROM python:3.9.6-slim-buster
 
@@ -13,11 +19,15 @@ RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSI
     && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
 
+# pip 패키지 복사
+COPY --from=builder /root/.local /root/.local
+ENV PATH=/root/.local/bin:$PATH
+
 # requirements.txt 를 먼저 복사함. 
-COPY requirements.txt .
+# COPY requirements.txt .
 
 # pip 의존성 설치
-RUN pip install -r requirements.txt
+# RUN pip install -r requirements.txt
 
 # cron 스케쥴링 추가
 # RUN echo "*/30 * * * * /bin/sh nobody -c 'cd /app/web && /usr/bin/git pull -q origin develop' >>/var/log/cron.log 2>&1" | crontab -
