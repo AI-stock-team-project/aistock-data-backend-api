@@ -9,6 +9,7 @@ Thumbs.db
 
 # PyCharm
 .idea/*
+.idex/.name
 !.idea/vcs.xml
 !.idea/inspectionProfiles/profiles_settings.xml
 !.idea/inspectionProfiles/Project_Default.xml
