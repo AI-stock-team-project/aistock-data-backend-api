@@ -8,7 +8,7 @@ Thumbs.db
 *.code-workspace
 
 # PyCharm
-.idea/
+.idea/*
 !.idea/.name
 !.idea/vcs.xml
 !.idea/inspectionProfiles/profiles_settings.xml
