@@ -2,7 +2,7 @@
 # from CSV.Class_Strategies import get_stocks
 # import pandas as pd
 # from sqlalchemy import create_engine
-from aistock import StockReader, StockData
+from aistock import StockReader, StockPrice
 
 
 def test():
@@ -16,15 +16,15 @@ def test():
 
 
 def test_fetch_stock_prices():
-    StockData.fetch_prices_by_ticker('095570', '2021-08-01')
+    StockPrice.fetch_prices_by_ticker('095570', '2021-08-01')
 
 
 def test_build_close_price():
-    StockData.build_close_price_database('095570', '2021-01-01')
+    StockPrice.build_close_price_database('095570', '2021-01-01')
 
 
 def test_retrieve_prices_by_ticker():
-    df = StockData.retrieve_prices_by_ticker('095570', '2021-01-01')
+    df = StockPrice.retrieve_prices_by_ticker('095570', '2021-01-01')
     # print(type(df.index))
     print(df)
 
@@ -41,7 +41,7 @@ def test_get_stock_close_prices():
     symbol = '095570'
     date = '2021-05-20'
 
-    df = StockData.get_stock_close_price(symbol, date)
+    df = StockPrice.get_stock_close_price(symbol, date)
     print(type(df.index))
     print(df)
 
