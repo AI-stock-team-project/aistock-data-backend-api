@@ -4,8 +4,9 @@ import csv
 import strategy.Strategies as st
 from strategy.Strategies import get_stocks
 import time
-from datetime import timedelta
+from datetime import timedelta, datetime, date
 from aistock.StockPrice import get_close_prices_by, get_volumes_by, StockPriceTable
+from dateutil.relativedelta import relativedelta
 
 
 def test():
@@ -26,8 +27,63 @@ def test():
     # df = df.pct_change(20)
     # rs = get_stocks()
     # print(rs)
-    rs = get_volumes_by('265520', begin_date='2021-07-01')
-    print(rs)
+    # df = get_volumes_by('265520', begin_date='2021-07-01')['volume']
+    # print(df)
+    # volumes = df.iloc[::-1]  # iloc[::-1]은 역순정렬
+    # print(volumes)
+    # speedy()
+    # rising_date_rate()
+    dual_mo()
+
+
+    """
+    sum_vol20 = 0
+    today_vol = 0
+    # print(datetime.today() == date.today())
+    # print(datetime.today())
+
+    # print(volumes.index[0])
+
+    today = datetime.today().strftime("%Y-%m-%d")
+    yesterday = (datetime.now() + timedelta(days=-1)).strftime('%Y-%m-%d')
+
+    if volumes.index[0].strftime('%Y-%m-%d') == today:
+        # 마지막 갖고 있는 값이 오늘 날짜인 경우.
+        pass
+
+    latest_volume = None
+    sum_count = 0
+    for index, vol in volumes.items():
+        if index.strftime('%Y-%m-%d') == today:
+            continue
+        elif latest_volume is None:
+            latest_volume = vol
+        elif sum_count < 20:
+            sum_vol20 += vol
+            sum_count += 1
+        else:
+            break
+
+        # print(index.strftime('%Y-%m-%d'))
+        # datetime.today().strftime('%Y-%m-%d')
+        # print(value)
+
+    for i, vol in enumerate(volumes):
+        if i == 0:  # 오늘 날짜
+            continue
+        elif i == 1:  # 어제 날짜
+            today_vol = vol
+        elif 2 <= i <= 21:
+            sum_vol20 += vol
+        else:
+            break
+
+    avg_vol20 = sum_vol20 / 20  # 최근 20일간 평균 거래량 구하기
+    if today_vol > avg_vol20 * 10:  # 조회 시작일의 거래량이 평균 거래량을 1000% 초과한다면 True
+        print('True')
+    else:
+        print('False')
+    """
 
 
 def test_all():
@@ -69,7 +125,7 @@ def test_mo3():
     print(timedelta(seconds=(time.time() - start)))
 
 
-def speedy():
+def test_speedy():
     # ###################### 급등주 ############################
     start = time.time()
     print("급등주 csv")
@@ -81,7 +137,7 @@ def speedy():
     print(timedelta(seconds=(time.time() - start)))
 
 
-def date_count():
+def rising_date_rate():
     # #################### 하루 상승빈도 ########################
     start = time.time()
     print("하루 상승빈도 csv")

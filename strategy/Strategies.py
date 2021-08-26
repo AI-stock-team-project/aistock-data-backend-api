@@ -1,22 +1,16 @@
 import pandas as pd
 import FinanceDataReader as fdr
-from datetime import datetime, timedelta
+from datetime import timedelta, datetime, date
+from dateutil.relativedelta import relativedelta
 import aistock.StockReader as StockReader
 from pandas import Series, DataFrame
-from aistock.StockPrice import get_close_prices_by, StockPriceTable
+from aistock.StockPrice import get_close_prices_by, StockPriceTable, get_volumes_by
+# noinspection PyUnresolvedReferences
+from deprecated import deprecated
 import os
 import warnings
 warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
-# today = datetime.datetime.today().strftime("%Y%m%d")
-# kospi = stock.get_market_fundamental_by_ticker(today, market='KOSPI').index
-# kosdaq = stock.get_market_fundamental_by_ticker(today, market='KOSDAQ').index
-# stocks = kospi.append(kosdaq)
-#
-# with open('stocks.csv', 'w') as file:
-#     write = csv.writer(file)
-#     write.writerow(stocks)
 
-# stocks = pd.read_csv('stocks.csv')
 # 글로벌 변수로 전환. 자꾸 로드하는 것을 줄일 수 있음. (큰 차이는 안 나는 듯..)
 g_stocks = None
 
@@ -64,13 +58,7 @@ def get_close_prices_all(start_date):
     :return: DataFrame=index(날짜:y-m-d), columns(tickers)
     """
     df = pd.DataFrame()
-    # for s in Strategies.get_holding_list('KOSPI'):
     stocklist = get_stocks()
-    # for ticker in stocklist:
-    #    df[ticker] = fdr.DataReader(ticker, start_date)['Close']
-    #    # s = fdr.DataReader(_code, start_date)['Close'].rename(_code)
-    #    # df = pd.concat([df, s], axis=1)
-    # return df
     for ticker in stocklist:
         # print(ticker, type(ticker))
 
@@ -141,38 +129,42 @@ def momentum_3months() -> DataFrame:
     return memontum_month('3month')
 
 
-def check_speedy_rising_volume_yesterday(ticker: str):
+def check_speedy_rising_volume_yesterday(ticker: str) -> bool:
     """
     급등주 여부를 검사하는 함수
     어제를 기준으로 그보다 더 전의 20일간의 거래량의 평균을 구해서 비교
     :param ticker: ticker 코드
     :return: bool
     """
-    # today = datetime.today().strftime("%Y%m%d")
-    start_date = (datetime.now() + timedelta(days=-30)).strftime('%Y-%m-%d')
-    df = fdr.DataReader(ticker, start_date)
-    volumes = df['Volume'].iloc[::-1]
-    # df['Volume'].sort_index()
+    start_date = (datetime.now() + timedelta(days=-45)).strftime('%Y-%m-%d')
+    # df = fdr.DataReader(ticker, start_date)
+    # volumes = df['Volume'].iloc[::-1]
+    df = get_volumes_by(ticker, begin_date=start_date)['volume']
+    volumes = df.iloc[::-1]  # iloc[::-1]은 역순정렬
 
     if len(volumes) < 22:  # 총 22일 치의 데이터가 없을 경우 제외(최근 상장 종목)
         return False
 
     sum_vol20 = 0
-    today_vol = 0
-
-    for i, vol in enumerate(volumes):
-        if i == 0:  # 오늘 날짜
+    # today_vol = 0
+    today = datetime.today().strftime("%Y-%m-%d")
+    latest_volume = None
+    sum_count = 0
+    for index, vol in volumes.items():
+        if index.strftime('%Y-%m-%d') == today:
             continue
-        elif i == 1:  # 어제 날짜
-            today_vol = vol
-        elif 2 <= i <= 21:
+        elif latest_volume is None:
+            latest_volume = vol
+        elif sum_count < 20:
             sum_vol20 += vol
+            sum_count += 1
         else:
             break
 
     avg_vol20 = sum_vol20 / 20  # 최근 20일간 평균 거래량 구하기
-    if today_vol > avg_vol20 * 10:  # 조회 시작일의 거래량이 평균 거래량을 1000% 초과한다면 True
+    if latest_volume > avg_vol20 * 10:  # 조회 시작일의 거래량이 평균 거래량을 1000% 초과한다면 True
         return True
+    return False
 
 
 def speedy_rising_volume() -> list:
@@ -193,17 +185,26 @@ def up_down_zero(code_updown):
     :param code_updown:
     :return:
     """
-    today = datetime.today().strftime("%Y-%m-%d")
-    year = today[0:4]
-    month_day = today[4:]
-    one_year_ago = str(int(year) - 1) + month_day
+    one_year_ago = (datetime.now() - relativedelta(years=1)).strftime('%Y-%m-%d')
 
-    data = fdr.DataReader(code_updown, one_year_ago)[['Close']]
+    # data = fdr.DataReader(code_updown, one_year_ago)[['Close']]
+    data = get_close_prices_by(code_updown, begin_date=one_year_ago)['close']
+
     data_rtn = data.pct_change()
 
     up = 0
     nothing = 0
     down = 0
+
+    for index, pct in data_rtn.items():
+        if pct > 0:
+            up += 1
+        elif pct == 0:
+            nothing += 1
+        else:
+            down += 1
+
+    """
     for i, date in enumerate(data.index):
         if data_rtn.Close.iloc[i] > 0:
             up = up + 1
@@ -211,6 +212,7 @@ def up_down_zero(code_updown):
             nothing = nothing + 1
         else:
             down = down + 1
+    """
 
     total_days = len(data_rtn.index)
     return up / total_days, down / total_days, nothing / total_days
@@ -244,9 +246,9 @@ def get_up_down_zero_df() -> DataFrame:
     up_down_zero_df = up_down_zero_df.sort_values(by='상승 확률 높은 순위')
     up_down_zero_df = up_down_zero_df.reset_index(drop=True)
     return up_down_zero_df
-# ------------------------------- 듀얼 모멘텀 함수들 -----------------------------#
 
 
+@deprecated
 def get_holding_list(index_name):
     """
     홀딩 리스트 가져오기

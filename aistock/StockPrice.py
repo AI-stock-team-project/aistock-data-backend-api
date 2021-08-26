@@ -3,6 +3,7 @@ import pandas as pd
 from pandas import Series, DataFrame
 import FinanceDataReader as fdr
 from pykrx import stock
+# noinspection PyUnresolvedReferences
 from deprecated import deprecated
 from datetime import timedelta
 import datetime
