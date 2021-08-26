@@ -1,6 +1,25 @@
 import sqlalchemy
+from sqlalchemy.orm import scoped_session, sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
 import os
 import sqlite3
+
+
+def create_engine():
+    """
+    환경변수로 설정된 값을 토대로 커넥션을 위한 engine 설정을 완료한다.
+    :return: sqlalchemy engine
+    """
+    database_host = os.getenv('DB_HOST', 'localhost')
+    database_port = os.getenv('DB_PORT', '3306')
+    database_name = os.getenv('DB_DATABASE', 'default')
+    database_username = os.getenv('DB_USER', 'default')
+    database_password = os.getenv('DB_PASSWORD', '')
+    _engine = sqlalchemy.create_engine(
+        'mysql+mysqlconnector://{0}:{1}@{2}:{3}/{4}'.format(
+            database_username, database_password,
+            database_host, database_port, database_name))
+    return _engine
 
 
 def connect():
@@ -13,10 +32,11 @@ def connect():
     database_name = os.getenv('DB_DATABASE', 'default')
     database_username = os.getenv('DB_USER', 'default')
     database_password = os.getenv('DB_PASSWORD', '')
-    engine = sqlalchemy.create_engine('mysql+mysqlconnector://{0}:{1}@{2}:{3}/{4}'.
-                                      format(database_username, database_password,
-                                             database_host, database_port, database_name))
-    return engine
+    _engine = sqlalchemy.create_engine(
+        'mysql+mysqlconnector://{0}:{1}@{2}:{3}/{4}'.format(
+            database_username, database_password,
+            database_host, database_port, database_name))
+    return _engine
 
 
 def connect_local():
@@ -30,3 +50,9 @@ def connect_local():
         return sqlite3.connect('test2.db')
     else:
         return connect()
+
+
+engine = create_engine()
+db_session = scoped_session(sessionmaker(bind=engine))
+Base = declarative_base()
+Base.query = db_session.query_property()

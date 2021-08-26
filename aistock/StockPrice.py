@@ -4,12 +4,35 @@ from pandas import Series, DataFrame
 import FinanceDataReader as fdr
 from pykrx import stock
 from deprecated import deprecated
-from datetime import datetime, timedelta
+from datetime import timedelta
+import datetime
 import sqlalchemy
 import os
 import aistock.StockReader as StockReader
 from aistock.StockReader import read_prices_by_dates
 import aistock.database as aistock_database
+from sqlalchemy import Column, Integer, String, select
+from aistock.database import Base, db_session
+
+
+class StockPriceTable(Base):
+    """
+    sqlalchemy의 ORM 을 이용하기 위한 모델
+    """
+    __tablename__ = 'stock_price'
+    id = Column('id', String, primary_key=True)
+    symbol = Column('code', String)
+    date = Column('date', String)
+    open = Column('open', Integer)
+    high = Column('high', Integer)
+    low = Column('low', Integer)
+    close = Column('close', Integer)
+    volume = Column('volume', Integer)
+    trad_value = Column('trad_value', Integer)
+    fluc_rate = Column('fluc_rate', String)
+
+    def __repr__(self):
+        return f"{self.id} {self.symbol} {self.date} {self.open} {self.high} {self.low} {self.close} {self.volume} {self.trad_value} {self.fluc_rate}"
 
 
 class Table:
@@ -91,6 +114,62 @@ def fetch_prices_by_dates(start_date: str, end_date: str):
     df2.to_sql(Table.__tablename__, con=get_engine(), if_exists='append', index=False)
 
 
+# def get_close_prices_by(ticker):
+    #     """테스트용"""
+    # rs = db_session.query(StockPriceTable).filter_by(symbol=ticker, date='2021-07-20')
+    # df = pd.read_sql(rs.statement, db_session.bind)
+    # df = pd.DataFrame.from_records(rs, columns=['id','symbol'])
+
+    #     stmt = select(StockPriceTable).where(StockPriceTable.symbol == ticker, StockPriceTable.date == '2021-07-20')
+    # df = pd.read_sql(stmt, db_session.bind)
+    # return df
+
+
+def get_close_prices_by(ticker, date=None, begin_date=None, end_date=None) -> DataFrame:
+    """
+    get_close_prices_by(ticker) : 오늘(또는 마지막) 날짜의 종가
+    get_close_prices_by(ticker, date='yyyy-mm-dd') : 특정 날짜의 종가
+    get_close_prices_by(ticker, begin_date='yyyy-mm-dd') : 특정 날짜부터 최근 날짜까지의 종가
+    get_close_prices_by(ticker, begin_date='yyyy-mm-dd', end_date='yyyy-mm-dd') : 두 날짜 사이에 해당하는 종가
+    """
+    if ticker is None:
+        raise
+
+    stmt = select(StockPriceTable.date, StockPriceTable.symbol, StockPriceTable.close)
+    if date is not None:
+        # 해당 날짜만 조회
+        """stmt = select(StockPriceTable).where(
+            StockPriceTable.symbol == ticker,
+            StockPriceTable.date == date
+        )"""
+        stmt = stmt.where(
+            StockPriceTable.symbol == ticker,
+            StockPriceTable.date == date
+        )
+        df = pd.read_sql(stmt, db_session.bind)
+        df.set_index(StockPriceTable.date.name, inplace=True)
+        return df
+
+    if begin_date is not None:
+        if end_date is None:
+            # 최근 날짜로 end_date 셋팅
+            end_date = datetime.datetime.today().strftime("%Y-%m-%d")
+
+        # 구간에 대한 조회
+        """stmt = select(StockPriceTable).where(
+            StockPriceTable.symbol == ticker,
+            StockPriceTable.date.between(begin_date, end_date)
+        ).order_by(StockPriceTable.date.asc())"""
+        stmt = stmt.where(
+            StockPriceTable.symbol == ticker,
+            StockPriceTable.date.between(begin_date, end_date)
+        ).order_by(StockPriceTable.date.asc())
+        df = pd.read_sql(stmt, db_session.bind)
+        df.set_index(StockPriceTable.date.name, inplace=True)
+        return df
+    raise
+
+
 @deprecated
 def fetch_prices_by_ticker(ticker, date) -> None:
     """
@@ -124,8 +203,14 @@ def retrieve_prices_by_ticker(ticker, date) -> DataFrame:
     :type date: str
     :return: DataFrame
     """
-    df = pd.read_sql(f"select * from {Table.__tablename__} where {StockReader.COL_TICKER} = '{ticker}' and {StockReader.COL_DATE} >= datetime('{date}')",
-                     con=get_engine(), parse_dates=[StockReader.COL_DATE])
+    sql = f"""
+        select * 
+        from {Table.__tablename__} 
+        where {StockReader.COL_TICKER} = '{ticker}' and {StockReader.COL_DATE} >= datetime('{date}')
+    """
+    df = pd.read_sql(sql,
+                     con=get_engine(),
+                     parse_dates=[StockReader.COL_DATE])
     # df[COL_DATE] = pd.DatetimeIndex(df[COL_DATE])
     df.set_index(StockReader.COL_DATE, inplace=True)
     return df
@@ -148,4 +233,3 @@ def build_close_price_database(symbol, date):
                      con=get_engine())
     print(df)
     pass
-
