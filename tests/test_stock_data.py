@@ -33,36 +33,5 @@ def test_get_close_prices_by():
     print(df)
 
 
-def test_fetch_stock_prices():
-    StockPrice.fetch_prices_by_ticker('095570', '2021-08-01')
-
-
-def test_build_close_price():
-    StockPrice.build_close_price_database('095570', '2021-01-01')
-
-
-def test_retrieve_prices_by_ticker():
-    df = StockPrice.retrieve_prices_by_ticker('095570', '2021-01-01')
-    # print(type(df.index))
-    print(df)
-
-
-def test_get_stock_prices():
-    pass
-
-
-def test_get_stock_close_prices():
-    """
-
-    :return:
-    """
-    symbol = '095570'
-    date = '2021-05-20'
-
-    df = StockPrice.get_stock_close_price(symbol, date)
-    print(type(df.index))
-    print(df)
-
-
 if __name__ == '__main__':
     test()

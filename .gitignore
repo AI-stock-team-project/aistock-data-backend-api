@@ -30,5 +30,6 @@ venv.bak/
 *.env
 *.png
 *.db
+*.csv
 !stock_prices.db
 activate.cmd

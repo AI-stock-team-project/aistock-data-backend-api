@@ -3,7 +3,10 @@ import FinanceDataReader as fdr
 from datetime import datetime, timedelta
 import aistock.StockReader as StockReader
 from pandas import Series, DataFrame
-from aistock.StockPrice import get_close_prices_by
+from aistock.StockPrice import get_close_prices_by, StockPriceTable
+import os
+import warnings
+warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 # today = datetime.datetime.today().strftime("%Y%m%d")
 # kospi = stock.get_market_fundamental_by_ticker(today, market='KOSPI').index
 # kosdaq = stock.get_market_fundamental_by_ticker(today, market='KOSDAQ').index
@@ -24,50 +27,132 @@ def get_stocks():
     :return: 종목 목록 (DataFrame)
     """
     is_global_enabled = True
+    is_csv_enabled = True
 
     if not is_global_enabled:
         # 글로벌 변수를 이용하지 않고 바로바로 로드할 경우
         return StockReader.read_tickerlist_to_list()
 
-    global g_stocks
-
-    if g_stocks is not None:
-        return g_stocks
     else:
-        g_stocks = StockReader.read_tickerlist_to_list()
-        return g_stocks
+        global g_stocks
+
+        if g_stocks is not None:
+            return g_stocks
+        else:
+            if is_csv_enabled:
+                csv_file: str = 'g_stock.csv'
+                if os.path.exists(csv_file):
+                    df = pd.read_csv(csv_file)["ticker"]
+                    # print(df)
+                    g_stocks = df.to_list()
+                else:
+                    # csv 파일 생성
+                    g_stocks = StockReader.read_tickerlist_to_list()
+
+                    df = pd.DataFrame(g_stocks, columns=["ticker"])
+                    # noinspection PyTypeChecker
+                    df.to_csv(csv_file, index=False)
+            else:
+                g_stocks = StockReader.read_tickerlist_to_list()
+            return g_stocks
 
 
-# 현재 듀얼 모멘텀으로 어떤 주식을 사야 하는지 리스트화
-def bool_converter(bool_var):
-    """Returns Integer Value from Boolean Value
-    Parameters
-    ----------
-    bool_var : boolean
-        Boolean variables representing trade signals
-    Returns
-    -------
-    result : int
-        Integer variables representing trade signals
+def get_close_prices_all(start_date):
     """
-    if bool_var:
-        return 1
+    시작일로부터 현재까지의 종가 정보 조회
+    :param start_date:
+    :return: DataFrame=index(날짜:y-m-d), columns(tickers)
+    """
+    df = pd.DataFrame()
+    # for s in Strategies.get_holding_list('KOSPI'):
+    stocklist = get_stocks()
+    # for ticker in stocklist:
+    #    df[ticker] = fdr.DataReader(ticker, start_date)['Close']
+    #    # s = fdr.DataReader(_code, start_date)['Close'].rename(_code)
+    #    # df = pd.concat([df, s], axis=1)
+    # return df
+    for ticker in stocklist:
+        # print(ticker, type(ticker))
+
+        # 0:00:32.918956
+        df[ticker] = get_close_prices_by(ticker, begin_date=start_date)[StockPriceTable.close.name]
+
+        # 0: 01:07.990137
+        # s = get_close_prices_by(ticker, begin_date=start_date)[StockPriceColumns.close]
+        # df = pd.concat([df, s], axis=1)
+    return df
+
+
+def memontum_month(_momentum_type: str) -> DataFrame:
+    """
+    모멘텀 1개월/3개월 종목을 가져오는 함수
+    모멘텀 순위 있는 데이터프레임 출력
+    :return: DataFrame
+
+    """
+    if _momentum_type == '3month':
+        start_date_before = -90
+        pct_change_base = 60
     else:
-        return 0
+        start_date_before = -40
+        pct_change_base = 20
+
+    # 여유 있게 20일 + 10일 전까지의 데이터를 조회한다.
+    start_date = (datetime.now() + timedelta(days=start_date_before)).strftime('%Y-%m-%d')
+    df = get_close_prices_all(start_date)
+    # df = pd.DataFrame()
+    # df['060310'] = get_close_prices_by('060310', begin_date='2021-07-01')['close']
+    # df['265520'] = get_close_prices_by('265520', begin_date='2021-07-01')['close']
+
+    # 20 영업일 수익률
+    return_df = df.pct_change(pct_change_base)
+    # print(return_df)
+
+    # 오늘 날짜
+    # today = datetime.today().strftime("%Y-%m-%d")
+    # 아 이거... 주말에는 오류가 날 수 있어서.. 마지막 값으로 보정.
+    today = df.index[-1]
+
+    # index는 종목 코드이고 모멘텀 데이터 있는 데이터 프레임으로 만들기
+    s = return_df.loc[today]
+    momentum_df = pd.DataFrame(s)
+    momentum_df.columns = ["모멘텀"]
+
+    momentum_df['순위'] = momentum_df['모멘텀'].rank(ascending=False)
+    momentum_df = momentum_df.sort_values(by='순위')
+    return momentum_df.iloc[:30, :]
 
 
-def check_speedy_rising_volume_yesterday(code_instance):
+def momentum_1month() -> DataFrame:
+    """
+    모멘텀 1개월 종목을 가져오는 함수
+    모멘텀 순위 있는 데이터프레임 출력
+    :return: DataFrame
+    """
+    return memontum_month('1month')
+
+
+def momentum_3months() -> DataFrame:
+    """
+    모멘텀 3개월 종목을 가져오는 함수
+    모멘텀 순위 있는 데이터프레임 출력
+    :return: DataFrame
+    """
+    return memontum_month('3month')
+
+
+def check_speedy_rising_volume_yesterday(ticker: str):
     """
     급등주 여부를 검사하는 함수
-    어제를 기준으로 그보다 더전의 20일간의 평균을 구해서 비교
-    :param code_instance: ticker 코드
-    :type code_instance: str
+    어제를 기준으로 그보다 더 전의 20일간의 거래량의 평균을 구해서 비교
+    :param ticker: ticker 코드
     :return: bool
     """
     # today = datetime.today().strftime("%Y%m%d")
     start_date = (datetime.now() + timedelta(days=-30)).strftime('%Y-%m-%d')
-    df = fdr.DataReader(code_instance, start_date)
+    df = fdr.DataReader(ticker, start_date)
     volumes = df['Volume'].iloc[::-1]
+    # df['Volume'].sort_index()
 
     if len(volumes) < 22:  # 총 22일 치의 데이터가 없을 경우 제외(최근 상장 종목)
         return False
@@ -90,7 +175,7 @@ def check_speedy_rising_volume_yesterday(code_instance):
         return True
 
 
-def run() -> list:
+def speedy_rising_volume() -> list:
     """
     어제 거래량이 1000% 오늘 종목 목록
     :return: list
@@ -100,66 +185,6 @@ def run() -> list:
         if check_speedy_rising_volume_yesterday(ticker):
             speedy_rising_volume_list.append(ticker)
     return speedy_rising_volume_list
-
-
-def momentum_1month() -> DataFrame:
-    """
-    모멘텀 1개월 종목을 가져오는 함수
-    모멘텀 순위 있는 데이터프레임 출력
-    :return: DataFrame
-    """
-    # 여유 있게 20일 + 10일 전까지의 데이터를 조회한다.
-    start_date = (datetime.now() + timedelta(days=-30)).strftime('%Y-%m-%d')
-    df = get_close_prices_all(start_date)
-
-    # 20 영업일 수익률
-    return_df = df.pct_change(20)
-
-    # 오늘 날짜
-    # today = datetime.today().strftime("%Y-%m-%d")
-    # 아 이거... 주말에는 오류가 날 수 있어서.. 마지막 값으로 보정.
-    today = df.index[-1]
-
-    # index는 종목 코드이고 모멘텀 데이터 있는 데이터 프레임으로 만들기
-    s = return_df.loc[today]
-    momentum_df = pd.DataFrame(s)
-    momentum_df.columns = ["모멘텀"]
-
-    momentum_df['순위'] = momentum_df['모멘텀'].rank(ascending=False)
-    momentum_df = momentum_df.sort_values(by='순위')
-    return momentum_df
-
-
-def momentum_3months():
-    """
-    모멘텀 3개월 종목을 가져오는 함수
-    모멘텀 순위 있는 데이터프레임 출력
-    :return: DataFrame
-    """
-    # df = pd.DataFrame()
-    # stocks = get_stocks()
-    start_date = (datetime.now() + timedelta(days=-70)).strftime('%Y-%m-%d')
-    # for _code in stocks:
-    #    df[_code] = fdr.DataReader(_code, start_date)['Close']
-    #    # s = fdr.DataReader(_code, start_date)['Close'].rename(_code)
-    #    # df = pd.concat([df, s], axis=1)
-    df = get_close_prices_all(start_date)
-
-    # 60 영업일 수익률
-    return_df = df.pct_change(60)
-    # return_df
-
-    # 오늘 날짜
-    today = datetime.today().strftime("%Y-%m-%d")
-
-    # index는 종목 코드이고 모멘텀 데이터 있는 데이터 프레임으로 만들기
-    s = return_df.loc[today]
-    momentum_df = pd.DataFrame(s)
-    momentum_df.columns = ["모멘텀"]
-
-    momentum_df['순위'] = momentum_df['모멘텀'].rank(ascending=False)
-    momentum_df = momentum_df.sort_values(by='순위')
-    return momentum_df
 
 
 def up_down_zero(code_updown):
@@ -231,29 +256,23 @@ def get_holding_list(index_name):
     _stocks = list(fdr.StockListing(index_name)['Symbol'])  # 나스닥
     return _stocks[:30]  # 갯수 바꿀 수 있음!!
 
-# stock_dual = Strategies.get_holding_list('KOSPI')
 
-
-# noinspection PyPep8Naming
-def get_close_prices_all(start_date):
+# 현재 듀얼 모멘텀으로 어떤 주식을 사야 하는지 리스트화
+def bool_converter(bool_var):
+    """Returns Integer Value from Boolean Value
+    Parameters
+    ----------
+    bool_var : boolean
+        Boolean variables representing trade signals
+    Returns
+    -------
+    result : int
+        Integer variables representing trade signals
     """
-    시작일로부터 현재까지의 종가 정보 조회
-    :param start_date:
-    :return: DataFrame=index(날짜:y-m-d), columns(tickers)
-    """
-    df = pd.DataFrame()
-    # for s in Strategies.get_holding_list('KOSPI'):
-    stocklist = get_stocks()
-    # for ticker in stocklist:
-    #    df[ticker] = fdr.DataReader(ticker, start_date)['Close']
-    #    # s = fdr.DataReader(_code, start_date)['Close'].rename(_code)
-    #    # df = pd.concat([df, s], axis=1)
-    # return df
-    for ticker in stocklist:
-        df[ticker] = get_close_prices_by(ticker, begin_date=start_date)['close']
-    return df
-
-# prices = Strategies.getCloseDatafromList(stock_dual, '2021-01-01')
+    if bool_var:
+        return 1
+    else:
+        return 0
 
 
 def dual_momentum(prices, lookback_period, n_selection) -> list:

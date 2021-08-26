@@ -5,10 +5,10 @@ import aistock.database as aistock_database
 import pandas as pd
 from pandas import DataFrame
 from aistock import stock_prices_sqlite as sqlite_table
-import aistock.StockPrice as StockPrice
+from aistock.StockPrice import StockPriceTable
+
 
 FROM_TABLE = sqlite_table.StockPriceTable
-TO_TABLE = StockPrice.Table
 
 
 def load_from_sqlite() -> DataFrame:
@@ -21,26 +21,30 @@ def load_from_sqlite() -> DataFrame:
 
 
 def import_from_sqlite():
+    """
+    stock_price 의 초기 데이터를 sqlite에서 읽어서 import 하는 함수.
+    최초 1회에 실행된다.
+    """
     df = load_from_sqlite()
     df.rename(
         columns={
-            FROM_TABLE.symbol: TO_TABLE.code,
-            FROM_TABLE.date: TO_TABLE.date,
-            FROM_TABLE.open: TO_TABLE.open,
-            FROM_TABLE.high: TO_TABLE.high,
-            FROM_TABLE.low: TO_TABLE.low,
-            FROM_TABLE.close: TO_TABLE.close,
-            FROM_TABLE.volume: TO_TABLE.volume,
-            FROM_TABLE.trad_value: TO_TABLE.trad_value,
-            FROM_TABLE.fluc_rate: TO_TABLE.fluc_rate
+            FROM_TABLE.symbol: StockPriceTable.symbol.name,
+            FROM_TABLE.date: StockPriceTable.date.name,
+            FROM_TABLE.open: StockPriceTable.open.name,
+            FROM_TABLE.high: StockPriceTable.high.name,
+            FROM_TABLE.low: StockPriceTable.low.name,
+            FROM_TABLE.close: StockPriceTable.close.name,
+            FROM_TABLE.volume: StockPriceTable.volume.name,
+            FROM_TABLE.trad_value: StockPriceTable.trad_value.name,
+            FROM_TABLE.fluc_rate: StockPriceTable.fluc_rate.name
         },
         inplace=True
     )
-    df[TO_TABLE.fluc_rate] = df[TO_TABLE.fluc_rate].astype('str')
+    df[StockPriceTable.fluc_rate.name] = df[StockPriceTable.fluc_rate.name].astype('str')
     print(df.dtypes)
 
     df.to_sql(
-        TO_TABLE.__tablename__,
+        StockPriceTable.__tablename__,
         con=aistock_database.connect(),
         if_exists='append',
         index=False,
@@ -56,7 +60,7 @@ def count_mysql_table() -> int:
         sql = f"""
             select 
                 count(*) as count
-            from {TO_TABLE.__tablename__}
+            from {StockPriceTable.__tablename__}
             """
         rs = con.execute(sql)
         row = rs.fetchone()
