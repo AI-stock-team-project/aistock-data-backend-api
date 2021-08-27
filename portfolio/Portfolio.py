@@ -10,6 +10,8 @@ from pypfopt import risk_models
 from pypfopt import expected_returns
 from pypfopt.discrete_allocation import DiscreteAllocation, get_latest_prices
 import numpy as np
+from aistock.StockPrice import get_close_prices_by, StockPriceTable
+import aistock.StockReader as StockReader
 
 
 class OptimizeMethod(Enum):
@@ -120,19 +122,21 @@ def make_portfolio(optimize_method=OptimizeMethod.Efficient, asset_method=AssetM
 
     # 기간 설정
     start_date = datetime.datetime.today() - relativedelta(years=years)
-    start_date = start_date.strftime('%Y%m%d')
-    today = datetime.datetime.today().strftime("%Y%m%d")
+    start_date = start_date.strftime('%Y-%m-%d')
+    today = datetime.datetime.today().strftime("%Y-%m-%d")
     end_date = today
     df = pd.DataFrame()
 
-    for s in assets:
-        df[s] = fdr.DataReader(s, start_date, end_date)['Close']
+    for ticker in assets:
+        # df[ticker] = fdr.DataReader(ticker, start_date, end_date)['Close']
+        df[ticker] = get_close_prices_by(ticker, begin_date=start_date)[StockPriceTable.close.name]
 
     # drop null
     dfnull = df.dropna(axis=1)
 
     # 수익률의 공분산
     mu = expected_returns.mean_historical_return(dfnull)
+    # noinspection PyPep8Naming
     S = risk_models.sample_cov(dfnull)
     # print(plotting.plot_covariance(S))
 
@@ -140,11 +144,13 @@ def make_portfolio(optimize_method=OptimizeMethod.Efficient, asset_method=AssetM
     if optimize_method == OptimizeMethod.MaxSharpe:
         # 포폴 최적화 (Max sharp ratio)
         ef = EfficientFrontier(mu, S, solver="SCS")
+        # noinspection PyUnusedLocal
         weights = ef.max_sharpe()
     elif optimize_method == OptimizeMethod.Efficient:
         # 포폴 최적화 (Efficient Risk)
         vol_limit = param_risk_limit
         ef = EfficientFrontier(mu, S, solver="SCS")
+        # noinspection PyUnusedLocal
         weights = ef.efficient_risk(vol_limit)
     else:
         print('empty portfolio optimize method!')
@@ -158,6 +164,7 @@ def make_portfolio(optimize_method=OptimizeMethod.Efficient, asset_method=AssetM
     weights = cleaned_weights
     da = DiscreteAllocation(weights, latest_prices, total_portfolio_value=portfolio_val)
     allocation, leftover = da.lp_portfolio(verbose=False)
+    # noinspection PyProtectedMember,PyUnusedLocal
     rmse = da._allocation_rmse_error(verbose=False)
 
     # 각 종목별 실제 투자 금액
@@ -222,7 +229,8 @@ def make_portfolio(optimize_method=OptimizeMethod.Efficient, asset_method=AssetM
     portfolio = dfnull[['Port']].pct_change()
 
     # 코스피지수 불러오기
-    kospi = fdr.DataReader('KS11', start_date, end_date)[['Close']]
+    # kospi = fdr.DataReader('KS11', start_date, end_date)[['Close']]
+    kospi = StockReader.read_index_by('kospi', start_date, end_date)[['Close']]
 
     # 코스피지수의 변동률(수익률) 구하기
     # 변동률(수익률) = (당일가격-전일가격) / 전일가격
@@ -289,5 +297,6 @@ def make_portfolio(optimize_method=OptimizeMethod.Efficient, asset_method=AssetM
 
     # Show Portfolio performance
     print(ef.portfolio_performance(verbose=True))
+    # noinspection PyProtectedMember
     rmse = da._allocation_rmse_error(verbose=False)
     print(rmse)

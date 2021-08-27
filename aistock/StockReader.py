@@ -263,3 +263,13 @@ def read_prices_by_dates(start_date: str, end_date: str) -> DataFrame:
         time.sleep(1)
     df.reset_index(inplace=True)
     return df
+
+
+def read_index_by(index_symbol, start_date: str, end_date: str):
+    symbols = {
+        'kospi': 'KS11',
+        'kosdaq': 'KQ11'
+    }
+    index_symbol = index_symbol.lower()
+    symbol = symbols[index_symbol]
+    return fdr.DataReader(symbol, start_date, end_date)
