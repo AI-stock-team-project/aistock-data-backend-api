@@ -76,7 +76,7 @@ def test_custom_sharp():
 
 def test_dual_eff():
     optimize_method = OptimizeMethod.Efficient
-    asset_method = AssetMethod.DUAL
+    asset_method = AssetMethod.DUAL_MOMENTUM
     year = 3
     money = 15 * 1000000
     risk_limit = 0.3
@@ -92,7 +92,7 @@ def test_dual_eff():
 
 def test_dual_sharp():
     optimize_method = OptimizeMethod.MaxSharp
-    asset_method = AssetMethod.DUAL
+    asset_method = AssetMethod.DUAL_MOMENTUM
     year = 3
     money = 15 * 1000000
     risk_limit = 0.3
@@ -204,7 +204,7 @@ def test_mo3_sharp():
 
 def test_up_eff():
     optimize_method = OptimizeMethod.Efficient
-    asset_method = AssetMethod.DATE_COUNT
+    asset_method = AssetMethod.UP_FREQ
     year = 3
     money = 15 * 1000000
     risk_limit = 0.3
@@ -220,7 +220,7 @@ def test_up_eff():
 
 def test_up_sharp():
     optimize_method = OptimizeMethod.MaxSharp
-    asset_method = AssetMethod.DATE_COUNT
+    asset_method = AssetMethod.UP_FREQ
     year = 3
     money = 15 * 1000000
     risk_limit = 0.3

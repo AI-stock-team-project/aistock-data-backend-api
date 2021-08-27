@@ -30,7 +30,7 @@ class AssetMethod(Enum):
     # 종목 선택
     CUSTOM = 1
     # 듀얼모멘텀
-    DUAL = 2
+    DUAL_MOMENTUM = 2
     # 급등주
     SOARING = 3
     # 모멘텀 1개월
@@ -38,12 +38,12 @@ class AssetMethod(Enum):
     # 모멘텀 3개월
     MOMENTUM_3MONTH = 5
     # 상승하는 날의 빈도가 높음
-    DATE_COUNT = 6
+    UP_FREQ = 6
 
     def __str__(self):
         if self.value == self.CUSTOM.value:
             return 'Custom'
-        elif self.value == self.DUAL.value:
+        elif self.value == self.DUAL_MOMENTUM.value:
             return 'Dual Momentum'
         elif self.value == self.SOARING.value:
             return 'Speedy Rising'
@@ -51,7 +51,7 @@ class AssetMethod(Enum):
             return 'Momentum 1month'
         elif self.value == self.MOMENTUM_3MONTH.value:
             return 'Momentum 3month'
-        elif self.value == self.DATE_COUNT.value:
+        elif self.value == self.UP_FREQ.value:
             return 'Up.Down.Zero'
         else:
             return ''
@@ -65,7 +65,7 @@ def get_assets(method, custom_assets=None):
         # 국내 종목(삼성전자, SK하이닉스, 카카오, NAVER, LG화학 ) - 웹에 연결시 선택한 종목이 assets 에 들어가면 됨.
         # assets = ['005930', '000660', '035720', '035420', '051910']
         return custom_assets
-    elif method == AssetMethod.DUAL:
+    elif method == AssetMethod.DUAL_MOMENTUM:
         assets = pd.read_csv('../CSV/dualmomentumlist.csv')  # np.array(dualmomentumlist)
     elif method == AssetMethod.SOARING:
         df = pd.read_csv('../CSV/speedy_rising_volume_list_df.csv')
@@ -77,7 +77,7 @@ def get_assets(method, custom_assets=None):
         assets = pd.read_csv('../CSV/momentum_1mo_assets.csv')
     elif method == AssetMethod.MOMENTUM_3MONTH:
         assets = pd.read_csv('../CSV/momentum_3mos_assets.csv')
-    elif method == AssetMethod.DATE_COUNT:
+    elif method == AssetMethod.UP_FREQ:
         up_down_zero_df = pd.read_csv("../CSV/up_down_zero_df.csv")
         up_down_zero_df.index = up_down_zero_df['Unnamed: 0']
         up_down_zero_df = up_down_zero_df.drop('Unnamed: 0', axis=1)
@@ -91,7 +91,7 @@ def get_assets(method, custom_assets=None):
     return assets
 
 
-def make_portfolio(optimize_method=OptimizeMethod.Efficient, asset_method=AssetMethod.DUAL,
+def make_portfolio(optimize_method=OptimizeMethod.Efficient, asset_method=AssetMethod.DUAL_MOMENTUM,
                    years=3, money=15000000, risk_limit=0.3, custom_assets=None):
     """
 
