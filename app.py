@@ -1,16 +1,28 @@
+# noinspection PyUnresolvedReferences
 from flask import Flask, jsonify, request
 from flask_restx import Api, Resource
-
+from api_portfoilo import ApiPortfolio
 
 app = Flask(__name__)  # Flask 객체 선언.
-api = Api(app)  # Flask 객체에 Api 객체 등록
+# Flask 객체에 Api 객체 등록
+api = Api(
+    app,
+    version='0.1',
+    title="Aistock's API Server",
+    description=""
+)
+
+api.add_namespace(ApiPortfolio, '/portfolio')
 
 
 @api.route('/hello')
 class HelloWorld(Resource):
+
+    # noinspection PyMethodMayBeStatic
     def get(self):
         return {"hello": "world!"}
 
+    # noinspection PyMethodMayBeStatic
     def post(self):
         return {"hello": "world!", "method": "post"}
 
