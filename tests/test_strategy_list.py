@@ -33,7 +33,7 @@ def test():
     # print(volumes)
     # speedy()
     # rising_date_rate()
-    dual_mo()
+    test_dual_momentum()
 
 
     """
@@ -137,7 +137,7 @@ def test_speedy():
     print(timedelta(seconds=(time.time() - start)))
 
 
-def rising_date_rate():
+def test_rising_date_freq():
     # #################### 하루 상승빈도 ########################
     start = time.time()
     print("하루 상승빈도 csv")
@@ -148,14 +148,15 @@ def rising_date_rate():
     # # 대충 10분 혹은 그 이상 정도 걸림 ##
 
 
-def dual_mo():
+def test_dual_momentum():
     # ################### Dual Momentum #######################
     start = time.time()
     print("Dual Momentum csv")
     # stock_dual = st.get_holding_list('KOSPI')
-    stock_dual = get_stocks()
-    prices = st.get_close_prices_all('2021-01-01')
-    dualmomentumlist = st.dual_momentum(prices, lookback_period=20, n_selection=len(stock_dual) // 2)
+    # stock_dual = get_stocks()
+    # prices = st.get_close_prices_all('2021-01-01')
+    # dualmomentumlist = st.dual_momentum(prices, lookback_period=20, n_selection=len(stock_dual) // 2)
+    dualmomentumlist = st.get_dual_momentum_list()
 
     with open('dualmomentumlist.csv', 'w') as file:
         write = csv.writer(file)

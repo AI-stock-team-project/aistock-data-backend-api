@@ -1,19 +1,18 @@
-import sqlite3
 import pandas as pd
 from pandas import Series, DataFrame
-import FinanceDataReader as fdr
-from pykrx import stock
 # noinspection PyUnresolvedReferences
 from deprecated import deprecated
-from datetime import timedelta
-import datetime
+# noinspection PyUnresolvedReferences
+from datetime import timedelta, datetime
 import sqlalchemy
 import os
+
+from sqlalchemy import Column, Integer, String, select
+import aistock.database as aistock_database
+from aistock.database import Base, db_session
+
 import aistock.StockReader as StockReader
 from aistock.StockReader import read_prices_by_dates
-import aistock.database as aistock_database
-from sqlalchemy import Column, Integer, String, select
-from aistock.database import Base, db_session
 
 
 class StockPriceTable(Base):
@@ -168,7 +167,7 @@ def retrieve_prices_by(ticker, date=None, begin_date=None, end_date=None, select
     if begin_date is not None:
         if end_date is None:
             # 최근 날짜로 end_date 셋팅
-            end_date = datetime.datetime.today().strftime("%Y-%m-%d")
+            end_date = datetime.today().strftime("%Y-%m-%d")
 
         # 구간에 대한 조회
         stmt = select_stmt.where(

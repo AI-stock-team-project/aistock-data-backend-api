@@ -1,5 +1,5 @@
-from datetime import timedelta
-import datetime
+# noinspection PyUnresolvedReferences
+from datetime import timedelta, datetime, date
 from aistock.StockPrice import get_minmax_date, fetch_prices_by_dates
 
 
@@ -12,13 +12,13 @@ def update_prices(begin_date: str):
         min_datetime = None
         max_datetime = None
     else:
-        min_datetime = datetime.date.fromisoformat(min_date_str)
-        max_datetime = datetime.date.fromisoformat(max_date_str)
+        min_datetime = date.fromisoformat(min_date_str)
+        max_datetime = date.fromisoformat(max_date_str)
 
-    begin_datetime = datetime.date.fromisoformat(begin_date)
+    begin_datetime = date.fromisoformat(begin_date)
     # today = datetime.datetime.today().strftime('%Y-%m-%d')
-    today = datetime.date.today()
-    yesterday = datetime.date.today() - timedelta(days=1)
+    # today = date.today()
+    yesterday = date.today() - timedelta(days=1)
     end_datetime = yesterday
 
     if min_datetime is None:

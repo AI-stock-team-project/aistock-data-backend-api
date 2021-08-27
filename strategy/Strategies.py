@@ -1,14 +1,20 @@
 import pandas as pd
-import FinanceDataReader as fdr
+# noinspection PyUnresolvedReferences
+from pandas import Series, DataFrame
+# noinspection PyUnresolvedReferences
 from datetime import timedelta, datetime, date
 from dateutil.relativedelta import relativedelta
-import aistock.StockReader as StockReader
-from pandas import Series, DataFrame
-from aistock.StockPrice import get_close_prices_by, StockPriceTable, get_volumes_by
 # noinspection PyUnresolvedReferences
 from deprecated import deprecated
 import os
 import warnings
+
+import FinanceDataReader as fdr
+
+import aistock.StockReader as StockReader
+from aistock.StockPrice import get_close_prices_by, StockPriceTable, get_volumes_by
+
+# PerformanceWarning: DataFrame is highly fragmented. 문구 방지
 warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
 # 글로벌 변수로 전환. 자꾸 로드하는 것을 줄일 수 있음. (큰 차이는 안 나는 듯..)
@@ -104,10 +110,10 @@ def memontum_month(_momentum_type: str) -> DataFrame:
     # index는 종목 코드이고 모멘텀 데이터 있는 데이터 프레임으로 만들기
     s = return_df.loc[today]
     momentum_df = pd.DataFrame(s)
-    momentum_df.columns = ["모멘텀"]
+    momentum_df.columns = ["momentum"]
 
-    momentum_df['순위'] = momentum_df['모멘텀'].rank(ascending=False)
-    momentum_df = momentum_df.sort_values(by='순위')
+    momentum_df['rank'] = momentum_df['momentum'].rank(ascending=False)
+    momentum_df = momentum_df.sort_values(by='rank')
     return momentum_df.iloc[:30, :]
 
 
@@ -304,3 +310,15 @@ def dual_momentum(prices, lookback_period, n_selection) -> list:
     signal = (abs_signal == rel_signal).applymap(bool_converter) * abs_signal
     dual_momentum_list = list(signal[signal == 1].dropna(axis=1).columns)
     return dual_momentum_list
+
+
+def get_dual_momentum_list():
+    """
+    듀얼 모멘텀
+    설정 및 리스트를 반환한다.
+    내부적으로는 dual_momentum()을 이용한다.
+    """
+    stock_dual = get_stocks()
+    prices = get_close_prices_all('2021-01-01')
+    dualmomentumlist = dual_momentum(prices, lookback_period=20, n_selection=len(stock_dual) // 2)
+    return dualmomentumlist
