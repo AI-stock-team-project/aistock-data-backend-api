@@ -59,7 +59,7 @@ class AssetMethod(Enum):
             return ''
 
 
-def get_assets(method, custom_assets=None):
+def get_assets(method, custom_assets=None) -> list:
     """
     종목을 가져옴.
     """
@@ -94,7 +94,7 @@ def get_assets(method, custom_assets=None):
 
 
 def make_portfolio(optimize_method=OptimizeMethod.Efficient, asset_method=AssetMethod.DUAL_MOMENTUM,
-                   years=3, money=15000000, risk_limit=0.3, custom_assets=None):
+                   years=3, money=15000000, risk_limit=0.3, assets: list = None):
     """
 
     :param optimize_method: 포트폴리오 최적화 방법 선택
@@ -102,23 +102,25 @@ def make_portfolio(optimize_method=OptimizeMethod.Efficient, asset_method=AssetM
     :param years: 투자 기간
     :param money: 투자 금액
     :param risk_limit: 감당 리스크
-    :param custom_assets: 종목을 선택해서 넘겨받을 때. 기본값은 None
+    :param assets: 종목 선택
     :return:
     """
-    # ============= 파라미터 조정 ===========
+    # ============= 파라미터 조정 및 체크 ===========
+    if assets is None:
+        raise
+
     # 투자 금액
     param_money = money
     # 감당 리스크
     param_risk_limit = risk_limit
+    # 종목 (list 형)
+    param_assets = assets
 
     # ============== 구문 시작 ==============
     kospi_temp = fdr.StockListing('KOSPI')[['Symbol', 'Name']]
     kosdaq_temp = fdr.StockListing('KOSDAQ')[['Symbol', 'Name']]
     code_name_dict = pd.concat([kospi_temp, kosdaq_temp])
     code_name_dict = code_name_dict.set_index('Symbol').to_dict().get('Name')
-
-    # 종목 조회
-    assets = get_assets(asset_method, custom_assets)
 
     # 기간 설정
     start_date = datetime.datetime.today() - relativedelta(years=years)
@@ -127,7 +129,7 @@ def make_portfolio(optimize_method=OptimizeMethod.Efficient, asset_method=AssetM
     end_date = today
     df = pd.DataFrame()
 
-    for ticker in assets:
+    for ticker in param_assets:
         # df[ticker] = fdr.DataReader(ticker, start_date, end_date)['Close']
         df[ticker] = get_close_prices_by(ticker, begin_date=start_date)[StockPriceTable.close.name]
 
@@ -156,9 +158,15 @@ def make_portfolio(optimize_method=OptimizeMethod.Efficient, asset_method=AssetM
         print('empty portfolio optimize method!')
         raise
 
+    # 뭔가 계산하는 듯? 뭐지?
     cleaned_weights = ef.clean_weights()
-    print(ef.portfolio_performance(verbose=True))
+    # print(ef.portfolio_performance(verbose=True))
+    expected_annual_return, annual_volatility, sharpe_ratio = ef.portfolio_performance(verbose=False)
+    print("Expected annual return: {:.1f}%".format(100 * expected_annual_return))
+    print("Annual volatility: {:.1f}%".format(100 * annual_volatility))
+    print("Sharpe Ratio: {:.2f}".format(sharpe_ratio))
 
+    # 투자 비중, 투자 수량 등을 계산
     portfolio_val = param_money
     latest_prices = get_latest_prices(dfnull)
     weights = cleaned_weights
@@ -263,7 +271,7 @@ def make_portfolio(optimize_method=OptimizeMethod.Efficient, asset_method=AssetM
     plt.ylabel('Return', fontsize=18, labelpad=7)
     plt.legend(loc='best')
     plt.savefig('return_trends.png', dpi=100)
-    plt.show()
+    # plt.show()
 
     # 변동률 비교
     plt.figure(figsize=(18, 10))
@@ -286,9 +294,9 @@ def make_portfolio(optimize_method=OptimizeMethod.Efficient, asset_method=AssetM
 
     plt.grid(True)
     plt.savefig('votality_trends.png', dpi=100)
-    plt.show()
+    # plt.show()
     # ############# ------------print------------- #####################
-    print('----- Speedy rising portfolio performance -----')
+    print(f'----- {str(asset_method)} portfolio performance -----')
     # Show Funds
     print('Funds:', portfolio_val, 'KRW')
 
@@ -300,3 +308,10 @@ def make_portfolio(optimize_method=OptimizeMethod.Efficient, asset_method=AssetM
     # noinspection PyProtectedMember
     rmse = da._allocation_rmse_error(verbose=False)
     print(rmse)
+
+    return {
+        'expected_annual_return': expected_annual_return,
+        'annual_volatility': annual_volatility,
+        'sharpe_ratio': sharpe_ratio,
+        'balance': leftover,
+    }, portfolio_df_sorted

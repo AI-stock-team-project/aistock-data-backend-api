@@ -1,4 +1,4 @@
-from portfolio.Portfolio import make_portfolio, OptimizeMethod, AssetMethod
+from portfolio.Portfolio import make_portfolio, OptimizeMethod, AssetMethod, get_assets
 
 
 def test():
@@ -41,37 +41,45 @@ def test():
 def test_custom_eff():
     optimize_method = OptimizeMethod.Efficient
     asset_method = AssetMethod.CUSTOM
-    year = 3
+    year = 1
     money = 15 * 1000000
     risk_limit = 0.3
     custom_assets = ['005930', '000660', '035720', '035420', '051910']
 
-    make_portfolio(
+    assets = get_assets(asset_method, custom_assets)
+
+    rv, df = make_portfolio(
         optimize_method=optimize_method,
         asset_method=asset_method,
         years=year,
         money=money,
         risk_limit=risk_limit,
-        custom_assets=custom_assets
+        assets=assets
     )
+    # print(rv)
+    print(df.to_json())
 
 
 def test_custom_sharp():
     optimize_method = OptimizeMethod.MaxSharpe
     asset_method = AssetMethod.CUSTOM
-    year = 3
+    year = 1
     money = 15 * 1000000
     risk_limit = 0.3
     custom_assets = ['005930', '000660', '035720', '035420', '051910']
 
-    make_portfolio(
+    assets = get_assets(asset_method, custom_assets)
+
+    rv, df = make_portfolio(
         optimize_method=optimize_method,
         asset_method=asset_method,
         years=year,
         money=money,
         risk_limit=risk_limit,
-        custom_assets=custom_assets
+        assets=assets
     )
+    # print(rv)
+    print(df.to_json())
 
 
 def test_dual_eff():
@@ -81,13 +89,18 @@ def test_dual_eff():
     money = 15 * 1000000
     risk_limit = 0.3
 
-    make_portfolio(
+    assets = get_assets(asset_method)
+
+    rv, df = make_portfolio(
         optimize_method=optimize_method,
         asset_method=asset_method,
         years=year,
         money=money,
         risk_limit=risk_limit,
+        assets=assets
     )
+    # print(rv)
+    print(df.to_json())
 
 
 def test_dual_sharp():
@@ -97,13 +110,18 @@ def test_dual_sharp():
     money = 15 * 1000000
     risk_limit = 0.3
 
-    make_portfolio(
+    assets = get_assets(asset_method)
+
+    rv, df = make_portfolio(
         optimize_method=optimize_method,
         asset_method=asset_method,
         years=year,
         money=money,
         risk_limit=risk_limit,
+        assets=assets
     )
+    # print(rv)
+    print(df.to_json())
 
 
 def test_instant_eff():
@@ -113,13 +131,18 @@ def test_instant_eff():
     money = 15 * 1000000
     risk_limit = 0.3
 
-    make_portfolio(
+    assets = get_assets(asset_method)
+
+    rv, df = make_portfolio(
         optimize_method=optimize_method,
         asset_method=asset_method,
         years=year,
         money=money,
         risk_limit=risk_limit,
+        assets=assets
     )
+    # print(rv)
+    print(df.to_json())
 
 
 def test_instant_sharp():
@@ -129,13 +152,18 @@ def test_instant_sharp():
     money = 15 * 1000000
     risk_limit = 0.3
 
-    make_portfolio(
+    assets = get_assets(asset_method)
+
+    rv, df = make_portfolio(
         optimize_method=optimize_method,
         asset_method=asset_method,
         years=year,
         money=money,
         risk_limit=risk_limit,
+        assets=assets
     )
+    # print(rv)
+    print(df.to_json())
 
 
 def test_mo1_eff():
@@ -145,13 +173,18 @@ def test_mo1_eff():
     money = 15 * 1000000
     risk_limit = 0.3
 
-    make_portfolio(
+    assets = get_assets(asset_method)
+
+    rv, df = make_portfolio(
         optimize_method=optimize_method,
         asset_method=asset_method,
         years=year,
         money=money,
         risk_limit=risk_limit,
+        assets=assets
     )
+    # print(rv)
+    print(df.to_json())
 
 
 def test_mo1_sharp():
@@ -161,13 +194,18 @@ def test_mo1_sharp():
     money = 15 * 1000000
     risk_limit = 0.3
 
-    make_portfolio(
+    assets = get_assets(asset_method)
+
+    rv, df = make_portfolio(
         optimize_method=optimize_method,
         asset_method=asset_method,
         years=year,
         money=money,
         risk_limit=risk_limit,
+        assets=assets
     )
+    # print(rv)
+    print(df.to_json())
 
 
 def test_mo3_eff():
@@ -177,13 +215,18 @@ def test_mo3_eff():
     money = 15 * 1000000
     risk_limit = 0.3
 
-    make_portfolio(
+    assets = get_assets(asset_method)
+
+    rv, df = make_portfolio(
         optimize_method=optimize_method,
         asset_method=asset_method,
         years=year,
         money=money,
         risk_limit=risk_limit,
+        assets=assets
     )
+    # print(rv)
+    print(df.to_json())
 
 
 def test_mo3_sharp():
@@ -193,13 +236,18 @@ def test_mo3_sharp():
     money = 15 * 1000000
     risk_limit = 0.3
 
-    make_portfolio(
+    assets = get_assets(asset_method)
+
+    rv, df = make_portfolio(
         optimize_method=optimize_method,
         asset_method=asset_method,
         years=year,
         money=money,
         risk_limit=risk_limit,
+        assets=assets
     )
+    # print(rv)
+    print(df.to_json())
 
 
 def test_up_eff():
@@ -209,13 +257,18 @@ def test_up_eff():
     money = 15 * 1000000
     risk_limit = 0.3
 
-    make_portfolio(
+    assets = get_assets(asset_method)
+
+    rv, df = make_portfolio(
         optimize_method=optimize_method,
         asset_method=asset_method,
         years=year,
         money=money,
         risk_limit=risk_limit,
+        assets=assets
     )
+    # print(rv)
+    print(df.to_json())
 
 
 def test_up_sharp():
@@ -225,13 +278,18 @@ def test_up_sharp():
     money = 15 * 1000000
     risk_limit = 0.3
 
-    make_portfolio(
+    assets = get_assets(asset_method)
+
+    rv, df = make_portfolio(
         optimize_method=optimize_method,
         asset_method=asset_method,
         years=year,
         money=money,
         risk_limit=risk_limit,
+        assets=assets
     )
+    # print(rv)
+    print(df.to_json())
 
 
 if __name__ == '__main__':

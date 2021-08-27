@@ -44,6 +44,12 @@ class Test2(Resource):
         return {"message": "test2", "method": "post", "name": name}
 
 
+@app.errorhandler(404)
+def page_not_found(e):
+    # note that we set the 404 status explicitly
+    return jsonify(error=str(e)), 404
+
+
 # flask run -p 5000
 if __name__ == '__main__':
     app.run(debug=True)

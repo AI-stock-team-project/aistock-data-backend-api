@@ -20,6 +20,9 @@ python import_stock_prices.py
 # 주가 정보 가져오기 (최근 것까지)
 python update_stock_price.py
 
+# 전략별 종목 리스트 생성
+python update_strategy_stock_list.py
+
 # touch /etc/crontab /etc/cron.*/*
 service cron start
 
