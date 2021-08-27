@@ -15,11 +15,12 @@
 
 패키지 목록
 1. `pip install PyPortfolioOpt` : cvxpy, numpy, pandas, scipy
-2. `pip install matplotlib` : cycler, kiwisolver, numpy, pillow, pyparsing, python-dateutil
-3. ~`pip install scikit-learn`~ : 
-4. `pip install finance-datareader` : lxml, pandas, requests, requests-file, tqdm
-5. `pip install pykrx` : datetime, deprecated, numpy, pandas, requests, xlrd
-6. `pip install beautifulsoup4` : soupsieve
+2. `pip install cvxopt` : PyPortfolioOpt 에서 필요로 함.
+3. `pip install matplotlib` : cycler, kiwisolver, numpy, pillow, pyparsing, python-dateutil
+4. ~`pip install scikit-learn`~ : 
+5. `pip install finance-datareader` : lxml, pandas, requests, requests-file, tqdm
+6. `pip install pykrx` : datetime, deprecated, numpy, pandas, requests, xlrd
+7. `pip install beautifulsoup4` : soupsieve
     * finance-datareader 에서 필요로 함.
 8. `pip install mysql-connector-python sqlalchemy`
    - mysql-connector-python : protobuf
