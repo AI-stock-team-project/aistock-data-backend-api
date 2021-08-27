@@ -1,3 +1,11 @@
+"""
+pyKRX, FinanceDataReader등을 이용하여, 외부 통신 등으로 주식 종목, 주가 정보를 조회하는 기능들을 모아둔 모듈
+
+함수 명칭 관련
+- read_ticker_*** : 종목 코드만 반환하는 형태의 함수
+- read_stock_*** : 종목의 상세 정보를 반환하는 형태의 함수
+- read_prices_*** : 주가 정보를 반환하는 형태의 함수
+"""
 import datetime
 import time
 from datetime import timedelta
@@ -31,15 +39,29 @@ COL_FLUC_RATE = 'Fluc_rate'
 COL_CHANGE = 'Fluc_rate'
 
 
-def read_tickerlist_to_list() -> list:
+class StockListCols:
+    """
+    종목 상세 목록을 불러올 때의 컬럼명
+    read_stocklist_by_market 에서 이용
+    """
+    FULL_CODE = 'FullCode'
+    CODE = 'Code'
+    SYMBOL = 'Symbol'
+    NAME = 'Name'
+    MARKET = 'Market'
+    MARKET_NAME = 'MarketName'
+    MARKET_CODE = 'MarketCode'
+
+
+def read_ticker_list() -> list:
     """
     종목을 조회하는 함수. pykrx를 통해서 로드함.
     :return: list 종목 코드 목록
     """
-    return read_tickerlist_to_list_pykrx()
+    return read_ticker_list_pykrx()
 
 
-def read_tickerlist_to_list_pykrx() -> list:
+def read_ticker_list_pykrx() -> list:
     """
     종목을 조회하는 함수.
     'pykrx' 사용
@@ -52,21 +74,28 @@ def read_tickerlist_to_list_pykrx() -> list:
     return list(tickers)
 
 
-class StockKrxCols:
-    FULL_CODE = 'FullCode'
-    CODE = 'Code'
-    SYMBOL = 'Symbol'
-    NAME = 'Name'
-    MARKET = 'Market'
-    MARKET_NAME = 'MarketName'
-    MARKET_CODE = 'MarketCode'
+@deprecated
+def read_ticker_list_pykrx_fundamental() -> list:
+    """
+    종목을 조회하는 함수. pykrx를 통해서 로드함.
+    :return: 종목 코드 목록 (DataFrame)
+    """
+    today = datetime.datetime.today().strftime("%Y%m%d")
+    kospi = stock.get_market_fundamental_by_ticker(today, market="KOSPI").index
+    kosdaq = stock.get_market_fundamental_by_ticker(today, market="KOSDAQ").index
+    tickers = kospi.append(kosdaq)
+    # df_tickers = pd.DataFrame(tickers, columns=['ticker'])
+    return list(tickers)
 
 
-def read_stocklist_by_market() -> DataFrame:
+def read_stock_list() -> DataFrame:
     """
     라이브러리 없이 바로 주식 종목을 가져오는 기능 구현
     FinanceDataReader/krx/listing.py 을 참조해서 개선
-    왠지 갯수가 안 맞는데?
+    왠지 갯수가 안 맞는데? 갯수가 훨씬 많은 듯함.
+    <사용>
+    웹 서비스에서 초기에 주식 종목을 만들 때에 이용했음.
+    실시간이라기보다는, 정보를 많이 갖고 있다는 것으로 보이므로, 초기 저장용도로 사용함.
 
     :return: 종목 목록 데이터프레임<br>
         FullCode	Code	Name	MarketCode	MarketName	Market	Symbol<br>
@@ -86,42 +115,20 @@ def read_stocklist_by_market() -> DataFrame:
     """
     df = json_normalize(jo, 'block1')
     df = df.rename(columns={
-        'full_code': StockKrxCols.FULL_CODE,
-        'short_code': StockKrxCols.CODE,
-        'codeName': StockKrxCols.NAME,
-        'marketCode': StockKrxCols.MARKET_CODE,
-        'marketName': StockKrxCols.MARKET_NAME,
-        'marketEngName': StockKrxCols.MARKET,
+        'full_code': StockListCols.FULL_CODE,
+        'short_code': StockListCols.CODE,
+        'codeName': StockListCols.NAME,
+        'marketCode': StockListCols.MARKET_CODE,
+        'marketName': StockListCols.MARKET_NAME,
+        'marketEngName': StockListCols.MARKET,
     })
-    df[StockKrxCols.SYMBOL] = df[StockKrxCols.CODE]
+    df[StockListCols.SYMBOL] = df[StockListCols.CODE]
     df.drop(['ord1', 'ord2'], inplace=True, axis=1)
     return df
 
 
-def read_stock_list_pykrx_fundamental() -> list:
-    """
-    종목을 조회하는 함수. pykrx를 통해서 로드함.
-    :return: 종목 코드 목록 (DataFrame)
-    """
-    today = datetime.datetime.today().strftime("%Y%m%d")
-    kospi = stock.get_market_fundamental_by_ticker(today, market="KOSPI").index
-    kosdaq = stock.get_market_fundamental_by_ticker(today, market="KOSDAQ").index
-    stocks = kospi.append(kosdaq)
-    # df_tickers = pd.DataFrame(tickers, columns=['ticker'])
-    return list(stocks)
-
-
-def read_stock_details(market: str = None) -> DataFrame:
-    """
-    상장 종목 전체를 조회
-    """
-    if market is None:
-        return read_stock_details_fdr()
-    else:
-        return read_stock_details_fdr(market)
-
-
-def read_stock_details_fdr(market: str = 'KRX') -> DataFrame:
+@deprecated
+def read_stock_list_fdr(market: str = 'KRX') -> DataFrame:
     """
     상장 종목 전체를 조회 [FinanceDataReader 이용]
     :param market: 마켓 구분 (KRX는 KOSPI,KOSDAQ,KONEX 모두 포함)
@@ -131,6 +138,7 @@ def read_stock_details_fdr(market: str = 'KRX') -> DataFrame:
     return df
 
 
+@deprecated
 def read_prices_by_ticker(ticker: str, start_date: str, end_date: str = None) -> DataFrame:
     """
     한 종목의 가격 정보를 조회
@@ -143,6 +151,7 @@ def read_prices_by_ticker(ticker: str, start_date: str, end_date: str = None) ->
     # return read_prices_by_ticker_pykrx(ticker, start_date, end_date)
 
 
+@deprecated
 def read_prices_by_ticker_fdr(ticker: str, start_date: str, end_date=None) -> DataFrame:
     """
     한 종목의 가격 정보를 조회 [FinanceDataReader 이용]
@@ -161,6 +170,7 @@ def read_prices_by_ticker_fdr(ticker: str, start_date: str, end_date=None) -> Da
     return df
 
 
+@deprecated
 def read_prices_by_ticker_pykrx(ticker: str, start_date: str, end_date=None) -> DataFrame:
     """
     한 종목의 가격 정보를 조회
@@ -189,9 +199,9 @@ def read_prices_by_ticker_pykrx(ticker: str, start_date: str, end_date=None) -> 
 
 def read_prices_by_date(date) -> DataFrame:
     """
-    특정 날짜의 전체 주식 가격 조회. (KOSPI/KOSDAQ/KONEX)
+    특정 날짜의 전체 주식의 가격 정보 조회. (KOSPI/KOSDAQ/KONEX)
     [pykrx 이용]
-    :param date: 기준 날짜
+    :param date: 기준 날짜 (yyyy-mm-dd)
     :return: DataFrame<br>
             Open	High	Low	Close	Volume	Trad_value	Fluc_rate<br>
     Symbol<br>
@@ -227,7 +237,9 @@ def read_prices_by_date(date) -> DataFrame:
 
 def read_prices_by_dates(start_date: str, end_date: str) -> DataFrame:
     """
-    특정 날짜부터 해당 날짜 까지의 주식 가격 정보를 조회.
+    특정 날짜부터 해당 날짜 까지의 전체 주식의 가격 정보를 조회.
+    :param: start_date (yyyy-mm-dd)
+    :raram: end_date (yyyy-mm-dd)
     :return: DataFrame<br>
         Symbol	Date	Open	High	Low	Close	Volume	Trad_value	Fluc_rate<br>
     0	060310	2019-05-20	2605	2615	2470	2570	246378	626177635	-1.34<br>
@@ -250,20 +262,4 @@ def read_prices_by_dates(start_date: str, end_date: str) -> DataFrame:
         # 혹시 모르니까 sleep 추가
         time.sleep(1)
     df.reset_index(inplace=True)
-    return df
-
-
-@deprecated
-def read_stock_close_prices(ticker='095570', date='2021-01-01'):
-    """
-    통신으로 외부에서 stock_close_price를 읽어들임.
-    :param ticker: 
-    :param date: 
-    :return: DataFrame
-    """
-    df = pd.DataFrame()
-    # ticker, date = '095570', '2021-08-01'
-    # df['Close'] = fdr.DataReader(ticker, date)['Close']
-    df[COL_CLOSE] = fdr.DataReader(ticker, date)['Close']
-    df[COL_TICKER] = ticker
     return df

@@ -30,14 +30,14 @@ def get_stocks():
 
     if not is_global_enabled:
         # 글로벌 변수를 이용하지 않고 바로바로 로드할 경우
-        return StockReader.read_tickerlist_to_list()
+        return StockReader.read_ticker_list()
 
     global g_stocks
 
     if g_stocks is not None:
         return g_stocks
     else:
-        g_stocks = StockReader.read_tickerlist_to_list()
+        g_stocks = StockReader.read_ticker_list()
         return g_stocks
 
 

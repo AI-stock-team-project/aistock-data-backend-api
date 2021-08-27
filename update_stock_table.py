@@ -8,7 +8,7 @@ entrypoint.sh 와 연관이 되므로, 파일명을 변경하지는 말 것.
 # noinspection PyPep8Naming
 import aistock.database as aistock_database
 import aistock.StockReader as StockReader
-from aistock.StockReader import StockKrxCols
+from aistock.StockReader import StockListCols
 
 
 class StockTable:
@@ -42,16 +42,16 @@ def update_stock_list():
     # 디비 커넥션
     engine = aistock_database.connect()
 
-    df = StockReader.read_stocklist_by_market()
+    df = StockReader.read_stock_list()
     df = df.rename(columns={
-        StockKrxCols.FULL_CODE: StockTempTable.Cols.code_isin,
-        StockKrxCols.SYMBOL: StockTempTable.Cols.symbol,
-        StockKrxCols.CODE: StockTempTable.Cols.code,
-        StockKrxCols.NAME: StockTempTable.Cols.name,
-        StockKrxCols.MARKET: StockTempTable.Cols.market
+        StockListCols.FULL_CODE: StockTempTable.Cols.code_isin,
+        StockListCols.SYMBOL: StockTempTable.Cols.symbol,
+        StockListCols.CODE: StockTempTable.Cols.code,
+        StockListCols.NAME: StockTempTable.Cols.name,
+        StockListCols.MARKET: StockTempTable.Cols.market
     })
     # 불필요한 컬럼 제거
-    df.drop([StockKrxCols.MARKET_NAME], inplace=True, axis=1)
+    df.drop([StockListCols.MARKET_NAME], inplace=True, axis=1)
 
     # 데이터 임시 테이블 생성 (테이블이 있을 경우 지우고 새로 작성)
     df.to_sql(con=engine, name=StockTempTable.table_name, if_exists='replace')

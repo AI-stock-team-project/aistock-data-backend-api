@@ -31,7 +31,7 @@ def get_stocks():
 
     if not is_global_enabled:
         # 글로벌 변수를 이용하지 않고 바로바로 로드할 경우
-        return StockReader.read_tickerlist_to_list()
+        return StockReader.read_ticker_list()
 
     else:
         global g_stocks
@@ -47,13 +47,13 @@ def get_stocks():
                     g_stocks = df.to_list()
                 else:
                     # csv 파일 생성
-                    g_stocks = StockReader.read_tickerlist_to_list()
+                    g_stocks = StockReader.read_ticker_list()
 
                     df = pd.DataFrame(g_stocks, columns=["ticker"])
                     # noinspection PyTypeChecker
                     df.to_csv(csv_file, index=False)
             else:
-                g_stocks = StockReader.read_tickerlist_to_list()
+                g_stocks = StockReader.read_ticker_list()
             return g_stocks
 
 

@@ -1,18 +1,16 @@
-import pandas as pd
-from pandas import Series, DataFrame
-# noinspection PyUnresolvedReferences
-from deprecated import deprecated
 # noinspection PyUnresolvedReferences
 from datetime import timedelta, datetime
-import sqlalchemy
-import os
 
+import pandas as pd
+# noinspection PyUnresolvedReferences
+from deprecated import deprecated
+from pandas import DataFrame
 from sqlalchemy import Column, Integer, String, select
-import aistock.database as aistock_database
-from aistock.database import Base, db_session
 
 import aistock.StockReader as StockReader
+import aistock.database as aistock_database
 from aistock.StockReader import read_prices_by_dates
+from aistock.database import Base, db_session
 
 
 class StockPriceTable(Base):
