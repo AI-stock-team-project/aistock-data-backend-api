@@ -243,13 +243,13 @@ def get_up_down_zero_df() -> DataFrame:
 
     # 데이터 프레임 만들기
     up_down_zero_df = pd.DataFrame()
-    up_down_zero_df['종목 코드'] = stocklist  # 종목코드
-    up_down_zero_df['상승 확률'] = up_list  # 일간 변동률이 양수인 날의 수
-    up_down_zero_df['하락 확률'] = down_list  # 일간 변동률이 음수인 날의 수
-    up_down_zero_df['변동 없는 확률'] = zero_list  # 일간 변동률이 0인 날의 수
+    up_down_zero_df['stock'] = stocklist  # 종목코드
+    up_down_zero_df['up_freq'] = up_list  # 일간 변동률이 양수인 날의 수
+    up_down_zero_df['down_freq'] = down_list  # 일간 변동률이 음수인 날의 수
+    up_down_zero_df['zero_freq'] = zero_list  # 일간 변동률이 0인 날의 수
 
-    up_down_zero_df['상승 확률 높은 순위'] = up_down_zero_df['상승 확률'].rank(ascending=False)
-    up_down_zero_df = up_down_zero_df.sort_values(by='상승 확률 높은 순위')
+    up_down_zero_df['up_rank'] = up_down_zero_df['up_freq'].rank(ascending=False)
+    up_down_zero_df = up_down_zero_df.sort_values(by='up_rank')
     up_down_zero_df = up_down_zero_df.reset_index(drop=True)
     return up_down_zero_df
 
