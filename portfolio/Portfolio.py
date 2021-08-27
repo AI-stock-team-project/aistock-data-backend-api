@@ -17,7 +17,7 @@ class OptimizeMethod(Enum):
     최적화 방법 종류
     """
     Efficient = 1
-    MaxSharp = 2
+    MaxSharpe = 2
 
     def __str__(self):
         return self.name
@@ -137,7 +137,7 @@ def make_portfolio(optimize_method=OptimizeMethod.Efficient, asset_method=AssetM
     # print(plotting.plot_covariance(S))
 
     # 포폴 최적화
-    if optimize_method == OptimizeMethod.MaxSharp:
+    if optimize_method == OptimizeMethod.MaxSharpe:
         # 포폴 최적화 (Max sharp ratio)
         ef = EfficientFrontier(mu, S, solver="SCS")
         weights = ef.max_sharpe()

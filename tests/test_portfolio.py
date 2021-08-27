@@ -57,7 +57,7 @@ def test_custom_eff():
 
 
 def test_custom_sharp():
-    optimize_method = OptimizeMethod.MaxSharp
+    optimize_method = OptimizeMethod.MaxSharpe
     asset_method = AssetMethod.CUSTOM
     year = 3
     money = 15 * 1000000
@@ -91,7 +91,7 @@ def test_dual_eff():
 
 
 def test_dual_sharp():
-    optimize_method = OptimizeMethod.MaxSharp
+    optimize_method = OptimizeMethod.MaxSharpe
     asset_method = AssetMethod.DUAL_MOMENTUM
     year = 3
     money = 15 * 1000000
@@ -123,7 +123,7 @@ def test_instant_eff():
 
 
 def test_instant_sharp():
-    optimize_method = OptimizeMethod.MaxSharp
+    optimize_method = OptimizeMethod.MaxSharpe
     asset_method = AssetMethod.SOARING
     year = 3
     money = 15 * 1000000
@@ -155,7 +155,7 @@ def test_mo1_eff():
 
 
 def test_mo1_sharp():
-    optimize_method = OptimizeMethod.MaxSharp
+    optimize_method = OptimizeMethod.MaxSharpe
     asset_method = AssetMethod.MOMENTUM_1MONTH
     year = 3
     money = 15 * 1000000
@@ -187,7 +187,7 @@ def test_mo3_eff():
 
 
 def test_mo3_sharp():
-    optimize_method = OptimizeMethod.MaxSharp
+    optimize_method = OptimizeMethod.MaxSharpe
     asset_method = AssetMethod.MOMENTUM_3MONTH
     year = 3
     money = 15 * 1000000
@@ -219,7 +219,7 @@ def test_up_eff():
 
 
 def test_up_sharp():
-    optimize_method = OptimizeMethod.MaxSharp
+    optimize_method = OptimizeMethod.MaxSharpe
     asset_method = AssetMethod.UP_FREQ
     year = 3
     money = 15 * 1000000
