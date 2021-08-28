@@ -25,17 +25,17 @@ def test():
     # print(a)
 
     test_custom_eff()
-    # test_custom_sharp()
+    # test_custom_sharpe()
     # test_dual_eff()
-    # test_dual_sharp()
+    # test_dual_sharpe()
     # test_instant_eff()
-    # test_instant_sharp()
+    # test_instant_sharpe()
     # test_mo1_eff()
-    # test_mo1_sharp()
+    # test_mo1_sharpe()
     # test_mo3_eff()
-    # test_mo3_eff()
+    # test_mo3_sharpe()
     # test_up_eff()
-    # test_up_sharp()
+    # test_up_sharpe()
 
 
 def test_custom_eff():
@@ -60,7 +60,7 @@ def test_custom_eff():
     print(df.to_json())
 
 
-def test_custom_sharp():
+def test_custom_sharpe():
     optimize_method = OptimizeMethod.MaxSharpe
     asset_method = AssetMethod.CUSTOM
     year = 1
@@ -103,7 +103,7 @@ def test_dual_eff():
     print(df.to_json())
 
 
-def test_dual_sharp():
+def test_dual_sharpe():
     optimize_method = OptimizeMethod.MaxSharpe
     asset_method = AssetMethod.DUAL_MOMENTUM
     year = 3
@@ -145,7 +145,7 @@ def test_instant_eff():
     print(df.to_json())
 
 
-def test_instant_sharp():
+def test_instant_sharpe():
     optimize_method = OptimizeMethod.MaxSharpe
     asset_method = AssetMethod.SOARING
     year = 3
@@ -187,7 +187,7 @@ def test_mo1_eff():
     print(df.to_json())
 
 
-def test_mo1_sharp():
+def test_mo1_sharpe():
     optimize_method = OptimizeMethod.MaxSharpe
     asset_method = AssetMethod.MOMENTUM_1MONTH
     year = 3
@@ -229,7 +229,7 @@ def test_mo3_eff():
     print(df.to_json())
 
 
-def test_mo3_sharp():
+def test_mo3_sharpe():
     optimize_method = OptimizeMethod.MaxSharpe
     asset_method = AssetMethod.MOMENTUM_3MONTH
     year = 3
@@ -271,7 +271,7 @@ def test_up_eff():
     print(df.to_json())
 
 
-def test_up_sharp():
+def test_up_sharpe():
     optimize_method = OptimizeMethod.MaxSharpe
     asset_method = AssetMethod.UP_FREQ
     year = 3

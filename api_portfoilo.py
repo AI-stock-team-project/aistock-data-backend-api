@@ -24,7 +24,7 @@ class MakePortfolio(Resource):
         optimize_method = OptimizeMethod.Efficient  # 기본값
         if optimize == 'efficient':
             optimize_method = OptimizeMethod.Efficient
-        elif optimize == 'maxsharp':
+        elif optimize == 'maxsharpe':
             optimize_method = OptimizeMethod.MaxSharpe
         else:
             abort(404)

@@ -1,15 +1,16 @@
 from enum import Enum
-
+from datetime import datetime
+from dateutil.relativedelta import relativedelta  # 몇달 전, 몇달 후, 몇년 전, 몇년 후 를 구하고 싶다면 relativedelta
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import FinanceDataReader as fdr
-import datetime
-from dateutil.relativedelta import relativedelta  # 몇달 전, 몇달 후, 몇년 전, 몇년 후 를 구하고 싶다면 relativedelta
+
 from pypfopt.efficient_frontier import EfficientFrontier
 from pypfopt import risk_models
 from pypfopt import expected_returns
 from pypfopt.discrete_allocation import DiscreteAllocation, get_latest_prices
-import numpy as np
+
 from aistock.StockPrice import get_close_prices_by, StockPriceTable
 import aistock.StockReader as StockReader
 
@@ -123,9 +124,9 @@ def make_portfolio(optimize_method=OptimizeMethod.Efficient, asset_method=AssetM
     code_name_dict = code_name_dict.set_index('Symbol').to_dict().get('Name')
 
     # 기간 설정
-    start_date = datetime.datetime.today() - relativedelta(years=years)
+    start_date = datetime.today() - relativedelta(years=years)
     start_date = start_date.strftime('%Y-%m-%d')
-    today = datetime.datetime.today().strftime("%Y-%m-%d")
+    today = datetime.today().strftime("%Y-%m-%d")
     end_date = today
     df = pd.DataFrame()
 
@@ -144,7 +145,7 @@ def make_portfolio(optimize_method=OptimizeMethod.Efficient, asset_method=AssetM
 
     # 포폴 최적화
     if optimize_method == OptimizeMethod.MaxSharpe:
-        # 포폴 최적화 (Max sharp ratio)
+        # 포폴 최적화 (Max sharpe ratio)
         ef = EfficientFrontier(mu, S, solver="SCS")
         # noinspection PyUnusedLocal
         weights = ef.max_sharpe()
