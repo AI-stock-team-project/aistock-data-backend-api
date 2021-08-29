@@ -1,3 +1,6 @@
+"""
+만들어진 Flask API에 대한 성능 테스트.
+"""
 import requests, json
 
 

@@ -1,3 +1,6 @@
+"""
+외부 API를 이용해서, 주식 종목, 주가 데이터, 주가 인덱스 등을 조회하는 기능을 테스트
+"""
 import aistock.StockReader as StockReader
 
 

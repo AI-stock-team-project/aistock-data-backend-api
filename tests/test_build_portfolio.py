@@ -1,3 +1,8 @@
+"""
+포트폴리오를 만드는 기능에 대한 테스트.
+
+잘 호출하고, DataFrame으로 리턴받아서, 원하는 결과가 나오는지 확인하는 부분.
+"""
 from portfolio.Portfolio import make_portfolio, OptimizeMethod, AssetMethod, get_assets
 
 

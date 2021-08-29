@@ -1,3 +1,6 @@
+"""
+데이터베이스 테이블에서 가격 정보를 조회하는 기능에 대한 테스트
+"""
 # from CSV.Class_Strategies import Strategies as st
 # from CSV.Class_Strategies import get_stocks
 import pandas as pd

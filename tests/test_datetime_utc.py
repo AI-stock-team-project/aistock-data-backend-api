@@ -1,3 +1,6 @@
+"""
+MySQL 과 Flask, Python 에서 Datetime 에 대한 Timezone 과 관련된 테스트.
+"""
 # noinspection PyUnresolvedReferences
 from deprecated import deprecated
 # noinspection PyUnresolvedReferences
