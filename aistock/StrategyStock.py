@@ -1,4 +1,5 @@
 import pandas as pd
+# noinspection PyUnresolvedReferences
 from pandas import Series, DataFrame
 # noinspection PyUnresolvedReferences
 from deprecated import deprecated
@@ -8,6 +9,14 @@ from datetime import timedelta, datetime
 from sqlalchemy import Column, Integer, String, select, DateTime
 import aistock.database as aistock_database
 from aistock.database import Base, db_session
+
+
+class StrategyCode:
+    dual_momentum = 'dual_mo'
+    soaring = 'soaring'
+    mementum_1month = 'mo_1'
+    mementum_3month = 'mo_3'
+    up_freq = 'up_freq'
 
 
 class StrategyStockListTable(Base):
@@ -26,7 +35,12 @@ def get_engine():
     return aistock_database.connect()
 
 
-def retrieve_strategy_stocks(strategy_code=''):
+def get_strategy_stocks_to_list(strategy_code: str) -> list:
+    s = retrieve_strategy_stocks(strategy_code)['ticker']
+    return s.to_list()
+
+
+def retrieve_strategy_stocks(strategy_code: str) -> DataFrame:
     select_stmt = select(StrategyStockListTable)
     stmt = select_stmt.where(
         StrategyStockListTable.strategy_code == strategy_code

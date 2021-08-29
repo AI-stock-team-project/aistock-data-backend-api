@@ -1,18 +1,19 @@
-from enum import Enum
 from datetime import datetime
-from dateutil.relativedelta import relativedelta  # 몇달 전, 몇달 후, 몇년 전, 몇년 후 를 구하고 싶다면 relativedelta
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
+from enum import Enum
+
 import FinanceDataReader as fdr
-
-from pypfopt.efficient_frontier import EfficientFrontier
-from pypfopt import risk_models
+import matplotlib.pyplot as plt
+import pandas as pd
+from dateutil.relativedelta import relativedelta
 from pypfopt import expected_returns
+from pypfopt import risk_models
 from pypfopt.discrete_allocation import DiscreteAllocation, get_latest_prices
+from pypfopt.efficient_frontier import EfficientFrontier
 
-from aistock.StockPrice import get_close_prices_by, StockPriceTable
 import aistock.StockReader as StockReader
+import aistock.StrategyStock as StrategyStock
+from aistock.StockPrice import get_close_prices_by, StockPriceTable
+from aistock.StrategyStock import StrategyCode
 
 
 class OptimizeMethod(Enum):
@@ -68,29 +69,21 @@ def get_assets(method, custom_assets=None) -> list:
         # 국내 종목(삼성전자, SK하이닉스, 카카오, NAVER, LG화학 ) - 웹에 연결시 선택한 종목이 assets 에 들어가면 됨.
         # assets = ['005930', '000660', '035720', '035420', '051910']
         return custom_assets
-    elif method == AssetMethod.DUAL_MOMENTUM:
-        assets = pd.read_csv('../CSV/dualmomentumlist.csv')  # np.array(dualmomentumlist)
+
+    if method == AssetMethod.DUAL_MOMENTUM:
+        strategy_code = StrategyCode.dual_momentum
     elif method == AssetMethod.SOARING:
-        df = pd.read_csv('../CSV/speedy_rising_volume_list_df.csv')
-        df['speedy_rising_volume_list'] = df[
-            'speedy_rising_volume_list'].apply(lambda x: '{0:0>6}'.format(x))
-        asset = df['speedy_rising_volume_list']
-        assets = np.array(asset.values)
+        strategy_code = StrategyCode.soaring
     elif method == AssetMethod.MOMENTUM_1MONTH:
-        assets = pd.read_csv('../CSV/momentum_1mo_assets.csv')
+        strategy_code = StrategyCode.mementum_1month
     elif method == AssetMethod.MOMENTUM_3MONTH:
-        assets = pd.read_csv('../CSV/momentum_3mos_assets.csv')
+        strategy_code = StrategyCode.mementum_3month
     elif method == AssetMethod.UP_FREQ:
-        up_down_zero_df = pd.read_csv("../CSV/up_down_zero_df.csv")
-        up_down_zero_df.index = up_down_zero_df['Unnamed: 0']
-        up_down_zero_df = up_down_zero_df.drop('Unnamed: 0', axis=1)
-        idx_list = up_down_zero_df.index[:30]
-        symbol_udz = []  # 종목 코드만 가져오기
-        for i in idx_list:
-            symbol_udz.append(up_down_zero_df.loc[i][0])
-        assets = np.array(symbol_udz, dtype='object')
+        strategy_code = StrategyCode.up_freq
     else:
         raise
+
+    assets = StrategyStock.get_strategy_stocks_to_list(strategy_code)
     return assets
 
 
@@ -215,16 +208,17 @@ def make_portfolio(optimize_method=OptimizeMethod.Efficient, asset_method=AssetM
         discrete_allocation_list.append(allocation.get(symbol))
     print(discrete_allocation_list)
 
-    portfolio_df = pd.DataFrame(columns=['종목명', '종목코드', '수량(주)', '투자금액(원)', '투자비중'])
-    portfolio_df['종목명'] = name_list
-    portfolio_df['종목코드'] = allocation
-    portfolio_df['수량(주)'] = discrete_allocation_list
-    portfolio_df['투자금액(원)'] = total_price_stock
-    portfolio_df['투자비중'] = total_weight_stock
-    portfolio_df_sorted = portfolio_df.sort_values('투자비중', ascending=False)
+    portfolio_df = pd.DataFrame(columns=['name', 'symbol', 'number', 'money', 'weight'])
+    portfolio_df['name'] = name_list  # 종목명
+    portfolio_df['symbol'] = allocation  # 종목코드
+    portfolio_df['number'] = discrete_allocation_list  # 수량 (주)
+    portfolio_df['money'] = total_price_stock  # 투자금액 (원)
+    portfolio_df['weight'] = total_weight_stock  # 투자 비중
+    portfolio_df_sorted = portfolio_df.sort_values('weight', ascending=False)
     portfolio_df_sorted = portfolio_df_sorted.reset_index(drop=True)
     # 투자 금액에 따라 최적화된 포트폴리오 종목별 수량
-    portfolio_df_sorted.loc["합계", 2:] = portfolio_df_sorted.sum()
+    portfolio_df_sorted.loc["sum", 2:] = portfolio_df_sorted.sum()
+    # portfolio_df_sorted.loc["sum", 'name'] = 'sum'
 
     # ################ 코스피랑 비교 ####################
     # 각 일자별, 종목별 종가에 해당 weights를 곱해주기

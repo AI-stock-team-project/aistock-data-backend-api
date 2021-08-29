@@ -19,7 +19,8 @@ class MakePortfolio(Resource):
     })
     def post(self, optimize, asset_method):
         """전략형 포트폴리오를 구성합니다."""
-        
+        is_debug = True
+
         # 최적화 방법
         optimize_method = OptimizeMethod.Efficient  # 기본값
         if optimize == 'efficient':
@@ -61,19 +62,37 @@ class MakePortfolio(Resource):
         # assets
         custom_assets = params.getlist('assets')  # list형으로 반환됨.
 
+        print(f"""
+        [ api portfolio call ]
+        optimize method : {optimize_method}
+        asset method : {asset_method}
+        money : {money}
+        years : {years}
+        risk_limit : {risk_limit}
+        """)
         # assets = ['005930', '000660', '035720', '035420', '051910']
         assets = get_assets(_asset_method, custom_assets)
 
         if len(assets) == 0:
             abort(400)
 
-        rv, df = make_portfolio(
-            optimize_method=optimize_method,
-            asset_method=_asset_method,
-            years=years,
-            money=money,
-            risk_limit=risk_limit,
-            assets=assets
-        )
+        if not is_debug:
+            rv, df = make_portfolio(
+                optimize_method=optimize_method,
+                asset_method=_asset_method,
+                years=years,
+                money=money,
+                risk_limit=risk_limit,
+                assets=assets
+            )
 
-        return {'result': rv, 'result_df': df.to_json()}
+            # return {'result': rv, 'result_df': df.to_json()}
+            return {'result': rv, 'result_df': df.to_json(orient='records')}
+        else:
+            rv = {'expected_annual_return': 0.60400610535409, 'annual_volatility': 0.3000171478073243, 'sharpe_ratio': 1.946575752827128, 'balance': 56700.0}
+            df = [
+                {"name": "NAVER", "symbol": "035420", "number": 30.0, "money": 12600000.0, "weight": 0.8431872478},
+                {"name": "\uc0bc\uc131\uc804\uc790", "symbol": "005930", "number": 21.0, "money": 1560300.0,
+                 "weight": 0.1044146875}
+            ]
+            return {'result': rv, 'result_df': df}
