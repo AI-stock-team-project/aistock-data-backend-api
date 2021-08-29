@@ -60,10 +60,10 @@ def fetch_prices_by_dates(start_date: str, end_date: str):
     """
     특정 기간의 일정동안의 주가정보를 업데이트
     """
-    print(start_date, end_date)
+    print('StockPrice.fetch_prices_by_dates', start_date, end_date)
     df = read_prices_by_dates(start_date, end_date)
 
-    print(df)
+    # print(df)
 
     # 원하는 컬럼만 지정... 일단 현재 기준으로 사용할 수 있는 건 다 사용하려고 함.
     df2 = df[[

@@ -100,4 +100,6 @@ def update_stock_list():
 
 
 if __name__ == '__main__':
+    print('[update stock table] >> ')
     update_stock_list()
+    print('<< [update stock table]')

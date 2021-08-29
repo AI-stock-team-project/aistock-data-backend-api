@@ -61,8 +61,9 @@ def test_custom_eff():
         risk_limit=risk_limit,
         assets=assets
     )
-    # print(rv)
-    print(df.to_json())
+    print(rv)
+    # print(df)
+    print(df.to_json(orient='records'))
 
 
 def test_custom_sharpe():

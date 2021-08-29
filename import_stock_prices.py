@@ -71,6 +71,8 @@ def count_mysql_table() -> int:
 if __name__ == '__main__':
     # 데이터베이스를 조회해서, row 가 없는 상태라면 sqlite 로 import 를 시행한다.
     if count_mysql_table() == 0:
+        print("[import_stock_price] >> ")
         import_from_sqlite()
+        print("<< [import_stock_price]")
     else:
         print("[import_stock_price] 데이터가 있는 상태이므로 주가 정보 import를 진행하지 않음")

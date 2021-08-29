@@ -14,6 +14,8 @@ from aistock.StrategyStock import StrategyStockListTable, get_engine
 import strategy.Strategies as st
 import time
 
+IS_DEBUG = False
+
 
 def update():
     """
@@ -29,7 +31,8 @@ def update():
     df = pd.concat([df1, df2, df3, df4, df5], ignore_index=True)
     # 작업일시를 추가
     df.insert(len(df.columns), 'created_at', datetime.now())
-    print(df)
+    if IS_DEBUG:
+        print(df)
     df.to_sql(
         name=StrategyStockListTable.__tablename__,
         con=get_engine(),
@@ -67,7 +70,8 @@ def generate_momentum_1month():
     # 최대 200개까지만 추림
     df = df.iloc[:200]
 
-    print(df.iloc[:10])
+    if IS_DEBUG:
+        print(df.iloc[:10])
     print(timedelta(seconds=(time.time() - start)))
 
     return df
@@ -102,7 +106,8 @@ def generate_momentum_3month():
     # 최대 200개까지만 추림
     df = df.iloc[:200]
 
-    print(df.iloc[:10])
+    if IS_DEBUG:
+        print(df.iloc[:10])
     print(timedelta(seconds=(time.time() - start)))
 
     return df
@@ -121,7 +126,8 @@ def generate_speedy():
     # 최대 200개까지만 추림
     df = df.iloc[:200]
 
-    print(df.iloc[:10])
+    if IS_DEBUG:
+        print(df.iloc[:10])
     print(timedelta(seconds=(time.time() - start)))
 
     return df
@@ -153,7 +159,8 @@ def generate_rising_date_freq():
     df = df.iloc[:200]
 
     # print(df)
-    print(df.iloc[:10])
+    if IS_DEBUG:
+        print(df.iloc[:10])
     print(timedelta(seconds=(time.time() - start)))
 
     return df
@@ -172,11 +179,14 @@ def generate_dual_momentum():
     # 최대 200개까지만 추림
     df = df.iloc[:200]
 
-    print(df.iloc[:10])
+    if IS_DEBUG:
+        print(df.iloc[:10])
     print(timedelta(seconds=(time.time() - start)))
 
     return df
 
 
 if __name__ == '__main__':
+    print("[update strategy stock list] >> ")
     update()
+    print("<< [update strategy stock list]")

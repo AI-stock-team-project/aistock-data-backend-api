@@ -7,6 +7,7 @@ def update_prices(begin_date: str):
     """
     지정일 부터 현재까지(어제까지)의 주가 정보를 가져와서 테이블에 넣는 함수
     """
+    print('[update stock price table] >> ', begin_date)
     (min_date_str, max_date_str) = get_minmax_date()
     if min_date_str is None:
         min_datetime = None
@@ -53,3 +54,4 @@ def update_prices(begin_date: str):
 
 if __name__ == '__main__':
     update_prices('2021-08-24')
+    print('<< [update stock price table]')
