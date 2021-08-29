@@ -1,6 +1,16 @@
+"""
+[주가 정보를 갱신하는 스크립트]
+- 테이블에 없는 날짜의 주가 정보를 새로 받아온다.
+
+[동작 설명]
+- mysql 테이블에서 데이터를 갖고 있는 최근날짜를 구한다.
+- pykrx를 이용하여, 갖고있는 데이터보다 이후의 날짜별 주가정보 데이터를 읽어온다.
+- insert를 한다.
+"""
 # noinspection PyUnresolvedReferences
 from datetime import timedelta, datetime, date
 from aistock.StockPrice import get_minmax_date, fetch_prices_by_dates
+import time
 
 
 def update_prices(begin_date: str):
@@ -23,9 +33,9 @@ def update_prices(begin_date: str):
     end_datetime = yesterday
 
     if min_datetime is None:
-        start = begin_datetime
+        begin = begin_datetime
         end = end_datetime
-        fetch_prices_by_dates(start.strftime('%Y-%m-%d'), end.strftime('%Y-%m-%d'))
+        fetch_prices_by_dates(begin.strftime('%Y-%m-%d'), end.strftime('%Y-%m-%d'))
 
     else:
         if begin_datetime >= min_datetime and max_datetime == end_datetime:
@@ -36,22 +46,23 @@ def update_prices(begin_date: str):
 
         if begin_datetime < min_datetime:
             # begin 지점이 min 보다 더 과거라면, 과거의 정보도 별도로 조회하기.
-            start = begin_datetime
+            begin = begin_datetime
             end = min_datetime - timedelta(days=1)
             # print(start, end)
-            fetch_prices_by_dates(start.strftime('%Y-%m-%d'), end.strftime('%Y-%m-%d'))
+            fetch_prices_by_dates(begin.strftime('%Y-%m-%d'), end.strftime('%Y-%m-%d'))
 
         if max_datetime < end_datetime:
             # max 다음날부터 오늘까지 조회 시작
-            start = max_datetime + timedelta(days=1)
+            begin = max_datetime + timedelta(days=1)
             # end = today
             end = end_datetime
             # print(start, end)
-            fetch_prices_by_dates(start.strftime('%Y-%m-%d'), end.strftime('%Y-%m-%d'))
+            fetch_prices_by_dates(begin.strftime('%Y-%m-%d'), end.strftime('%Y-%m-%d'))
 
         return True
 
 
 if __name__ == '__main__':
+    main_start = time.time()
     update_prices('2021-08-24')
-    print('<< [update stock price table]')
+    print('<< [update stock price table] [', timedelta(seconds=(time.time() - main_start)), ']')

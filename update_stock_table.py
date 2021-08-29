@@ -1,14 +1,20 @@
 """
-데이터베이스 테이블에 종목 리스트를 갱신하는 스크립트
+[데이터베이스 테이블에 종목 리스트를 갱신하는 스크립트]
+- 최초 1회 + 하루 한 번 정도로 호출되도록 설정한다.
+- entrypoint.sh 와 연관이 되므로, 파일명을 변경하지는 말 것.
 
-최초 1회 + 하루 한 번 정도로 호출되도록 설정한다.
-
-entrypoint.sh 와 연관이 되므로, 파일명을 변경하지는 말 것.
+[동작 설명]
+KRX에서 데이터를 읽어서, temp테이블(stock_list_temp)을 생성한다.
+그 후에 기존에 있던 테이블과 비교하면서 새로운 것은 insert하고,
+없어진 항목은 is_active=0 으로 변경해준다.
+실행될 때마다 최신의 결과로 갱신해준다.
 """
 # noinspection PyPep8Naming
 import aistock.database as aistock_database
 import aistock.StockReader as StockReader
 from aistock.StockReader import StockListCols
+import time
+from datetime import timedelta
 
 
 class StockTable:
@@ -100,6 +106,7 @@ def update_stock_list():
 
 
 if __name__ == '__main__':
+    main_start = time.time()
     print('[update stock table] >> ')
     update_stock_list()
-    print('<< [update stock table]')
+    print("<< [update stock table] [", timedelta(seconds=(time.time() - main_start)), ']')

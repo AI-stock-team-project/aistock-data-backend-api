@@ -1,9 +1,11 @@
 """
-데이터베이스 테이블에 전략별 종목 리스트를 갱시하는 스크립트.
+[데이터베이스 테이블에 전략별 종목 리스트를 갱시하는 스크립트]
+- 최초 1회 + 하루 한 번 정도로 호출되도록 설정한다.
+- entrypoint.sh 와 연관이 되므로, 파일명을 변경하지는 말 것.
 
-최초 1회 + 하루 한 번 정도로 호출되도록 설정한다.
-
-entrypoint.sh 와 연관이 되므로, 파일명을 변경하지는 말 것.
+[동작 설명]
+- 이미 저장되었던 종목 정보, 주가 정보 등을 토대로 전략별 종목을 분석하여 생성한다.
+- 생성한 정보를 'strategy_stock_list' 테이블에 insert 한다.
 """
 import pandas as pd
 # noinspection PyUnresolvedReferences
@@ -39,6 +41,7 @@ def update():
         if_exists='append',
         index=False
     )
+    print("update_strategy_stock_list.update")
 
 
 def generate_momentum_1month():
@@ -53,8 +56,8 @@ def generate_momentum_1month():
     strategy_code = 'mo_1'
 
     start = time.time()
-    print("generate [momentum 1 months]")
 
+    # 실행
     df = st.momentum_1month()
     df = df[[
         'rank'
@@ -72,7 +75,8 @@ def generate_momentum_1month():
 
     if IS_DEBUG:
         print(df.iloc[:10])
-    print(timedelta(seconds=(time.time() - start)))
+
+    print(f"generate [momentum 1 months] {len(df)} rows. [", timedelta(seconds=(time.time() - start)), ']')
 
     return df
 
@@ -89,8 +93,8 @@ def generate_momentum_3month():
     strategy_code = 'mo_3'
 
     start = time.time()
-    print("generate [momentum 3 months]")
 
+    # 실행
     df = st.momentum_3months()
     df = df[[
         'rank'
@@ -108,7 +112,7 @@ def generate_momentum_3month():
 
     if IS_DEBUG:
         print(df.iloc[:10])
-    print(timedelta(seconds=(time.time() - start)))
+    print(f"generate [momentum 3 months] {len(df)} rows. [", timedelta(seconds=(time.time() - start)), ']')
 
     return df
 
@@ -117,8 +121,8 @@ def generate_speedy():
     strategy_code = 'soaring'
 
     start = time.time()
-    print("generate [soaring]")
 
+    # 실행
     df = pd.DataFrame({'ticker': st.speedy_rising_volume()})
     df.insert(0, 'strategy_code', strategy_code)
     df.insert(len(df.columns), 'rank', 0)
@@ -128,7 +132,7 @@ def generate_speedy():
 
     if IS_DEBUG:
         print(df.iloc[:10])
-    print(timedelta(seconds=(time.time() - start)))
+    print(f"generate [soaring] {len(df)} rows. [", timedelta(seconds=(time.time() - start)), ']')
 
     return df
 
@@ -137,8 +141,8 @@ def generate_rising_date_freq():
     strategy_code = 'up_freq'
 
     start = time.time()
-    print("generate [rising_date_freq]")
 
+    # 실행
     df = st.get_up_down_zero_df()
     # up_freq 가 최소 0.01 이상되는 것만 추림.
     df = df[(df['up_freq'] > 0.01)]
@@ -161,7 +165,7 @@ def generate_rising_date_freq():
     # print(df)
     if IS_DEBUG:
         print(df.iloc[:10])
-    print(timedelta(seconds=(time.time() - start)))
+    print(f"generate [rising_date_freq] {len(df)} rows. [", timedelta(seconds=(time.time() - start)), ']')
 
     return df
 
@@ -170,8 +174,8 @@ def generate_dual_momentum():
     strategy_code = 'dual_mo'
 
     start = time.time()
-    print("generate [dual momentum]")
 
+    # 실행
     df = pd.DataFrame({'ticker': st.get_dual_momentum_list()})
     df.insert(0, 'strategy_code', strategy_code)
     df.insert(len(df.columns), 'rank', 0)
@@ -181,12 +185,13 @@ def generate_dual_momentum():
 
     if IS_DEBUG:
         print(df.iloc[:10])
-    print(timedelta(seconds=(time.time() - start)))
+    print(f"generate [dual momentum] {len(df)} rows. [", timedelta(seconds=(time.time() - start)), ']')
 
     return df
 
 
 if __name__ == '__main__':
+    main_start = time.time()
     print("[update strategy stock list] >> ")
     update()
-    print("<< [update strategy stock list]")
+    print("<< [update strategy stock list] [", timedelta(seconds=(time.time() - main_start)), ']')

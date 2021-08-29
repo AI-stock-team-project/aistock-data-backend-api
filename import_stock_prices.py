@@ -1,4 +1,11 @@
 """
+[SQLite에서 주가 정보를 읽어서 테이블에 넣는 스크립트]
+- 미리 만들어놓은 주가 정보를 sqlite로부터 읽어서 테이블에 넣는다.
+- 최초 1회에만 실행되는 스크립트.
+
+[동작설명]
+1. mysql 테이블에 row가 있는지 살핀다. row가 있으면 진행하지 않는다.
+2. 1건도 데이터가 없을 때, sqlite에서 데이터를 로드해서 insert를 해준다.
 """
 # noinspection PyPep8Naming
 import aistock.database as aistock_database
@@ -6,6 +13,8 @@ import pandas as pd
 from pandas import DataFrame
 from aistock import stock_prices_sqlite as sqlite_table
 from aistock.StockPrice import StockPriceTable
+import time
+from datetime import timedelta
 
 
 FROM_TABLE = sqlite_table.StockPriceTable
@@ -41,7 +50,7 @@ def import_from_sqlite():
         inplace=True
     )
     df[StockPriceTable.fluc_rate.name] = df[StockPriceTable.fluc_rate.name].astype('str')
-    print(df.dtypes)
+    # print(df.dtypes)
 
     df.to_sql(
         StockPriceTable.__tablename__,
@@ -71,8 +80,9 @@ def count_mysql_table() -> int:
 if __name__ == '__main__':
     # 데이터베이스를 조회해서, row 가 없는 상태라면 sqlite 로 import 를 시행한다.
     if count_mysql_table() == 0:
+        main_start = time.time()
         print("[import_stock_price] >> ")
         import_from_sqlite()
-        print("<< [import_stock_price]")
+        print("<< [import_stock_price] [", timedelta(seconds=(time.time() - main_start)), ']')
     else:
         print("[import_stock_price] 데이터가 있는 상태이므로 주가 정보 import를 진행하지 않음")
