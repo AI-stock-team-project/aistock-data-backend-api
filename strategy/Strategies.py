@@ -10,7 +10,7 @@ import os
 import warnings
 
 import FinanceDataReader as fdr
-
+from sqlalchemy import create_engine
 import aistock.StockReader as StockReader
 from aistock.StockPrice import get_close_prices_by, StockPriceTable, get_volumes_by
 
@@ -19,6 +19,7 @@ warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
 # 글로벌 변수로 전환. 자꾸 로드하는 것을 줄일 수 있음. (큰 차이는 안 나는 듯..)
 g_stocks = None
+G_STOCKS_SQLITE = 'g_stocks.db'
 
 
 def get_stocks():
@@ -26,35 +27,19 @@ def get_stocks():
     종목을 가져오기
     :return: 종목 목록 (DataFrame)
     """
-    is_global_enabled = True
-    is_csv_enabled = True
+    global g_stocks
 
-    if not is_global_enabled:
-        # 글로벌 변수를 이용하지 않고 바로바로 로드할 경우
-        return StockReader.read_ticker_list()
+    if g_stocks is not None:
+        return g_stocks
 
+    if os.path.exists(G_STOCKS_SQLITE):
+        s = retrieve_gstocks_sqlite()['ticker']
+        print('retrieve_gstocks_sqlite')
+        g_stocks = s.to_list()
+        return g_stocks
     else:
-        global g_stocks
-
-        if g_stocks is not None:
-            return g_stocks
-        else:
-            if is_csv_enabled:
-                csv_file: str = 'g_stock.csv'
-                if os.path.exists(csv_file):
-                    df = pd.read_csv(csv_file)["ticker"]
-                    # print(df)
-                    g_stocks = df.to_list()
-                else:
-                    # csv 파일 생성
-                    g_stocks = StockReader.read_ticker_list()
-
-                    df = pd.DataFrame(g_stocks, columns=["ticker"])
-                    # noinspection PyTypeChecker
-                    df.to_csv(csv_file, index=False)
-            else:
-                g_stocks = StockReader.read_ticker_list()
-            return g_stocks
+        g_stocks = create_gstocks_sqlite()
+        return g_stocks
 
 
 def get_close_prices_all(start_date):
@@ -322,3 +307,20 @@ def get_dual_momentum_list():
     prices = get_close_prices_all('2021-01-01')
     dualmomentumlist = dual_momentum(prices, lookback_period=20, n_selection=len(stock_dual) // 2)
     return dualmomentumlist
+
+
+def create_gstocks_sqlite() -> list:
+    stocks = StockReader.read_ticker_list()
+    df = pd.DataFrame(stocks, columns=["ticker"])
+    df.to_sql('g_stocks', con=get_gstocks_sqlite_engine(), index=False, if_exists='replace')
+    return stocks
+
+
+def get_gstocks_sqlite_engine():
+    engine = create_engine(f'sqlite:///{G_STOCKS_SQLITE}', echo=False)
+    return engine
+
+
+def retrieve_gstocks_sqlite() -> DataFrame:
+    df = pd.read_sql('g_stocks', con=get_gstocks_sqlite_engine())
+    return df

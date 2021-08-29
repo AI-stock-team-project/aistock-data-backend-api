@@ -13,6 +13,7 @@ from pandas import Series, DataFrame
 # noinspection PyUnresolvedReferences
 from datetime import timedelta, datetime, date
 from aistock.StrategyStock import StrategyStockListTable, get_engine
+import aistock.StrategyStock as StrategyStock
 import strategy.Strategies as st
 import time
 
@@ -35,6 +36,8 @@ def update():
     df.insert(len(df.columns), 'created_at', datetime.now())
     if IS_DEBUG:
         print(df)
+
+    StrategyStock.reset_all_rows()
     df.to_sql(
         name=StrategyStockListTable.__tablename__,
         con=get_engine(),

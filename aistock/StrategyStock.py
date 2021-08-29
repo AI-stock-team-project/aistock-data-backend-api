@@ -47,3 +47,15 @@ def retrieve_strategy_stocks(strategy_code: str) -> DataFrame:
     )
     df = pd.read_sql(stmt, db_session.bind)
     return df
+
+
+def reset_all_rows():
+    """
+    모든 로우를 지움
+    """
+    db_session.query(StrategyStockListTable).delete()
+    db_session.commit()
+
+
+def count():
+    db_session.query(StrategyStockListTable).count()
