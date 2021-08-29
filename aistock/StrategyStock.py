@@ -16,7 +16,7 @@ class StrategyStockListTable(Base):
     strategy_code = Column('strategy_code', String)
     ticker = Column('ticker', String)
     rank = Column('rank', Integer)
-    date = Column('date', DateTime)
+    created_at = Column('created_at', DateTime)
 
     def __repr__(self):
         return f"{self.strategy_code} {self.ticker} {self.rank}"
@@ -25,3 +25,11 @@ class StrategyStockListTable(Base):
 def get_engine():
     return aistock_database.connect()
 
+
+def retrieve_strategy_stocks(strategy_code=''):
+    select_stmt = select(StrategyStockListTable)
+    stmt = select_stmt.where(
+        StrategyStockListTable.strategy_code == strategy_code
+    )
+    df = pd.read_sql(stmt, db_session.bind)
+    return df
