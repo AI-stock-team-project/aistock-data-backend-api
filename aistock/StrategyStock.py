@@ -49,6 +49,16 @@ def retrieve_strategy_stocks(strategy_code: str) -> DataFrame:
     return df
 
 
+def retrive_strategy_stocks_rank(code, limit=10) -> DataFrame:
+    select_stmt = select(StrategyStockListTable)
+    stmt = select_stmt.where(
+        StrategyStockListTable.strategy_code == code
+    )
+    stmt.order_by(StrategyStockListTable.rank)
+    df = pd.read_sql(stmt, db_session.bind)[:10]
+    return df
+
+
 def reset_all_rows():
     """
     모든 로우를 지움

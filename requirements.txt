@@ -13,6 +13,7 @@ Deprecated==1.2.12
 ecos==2.0.7.post1
 finance-datareader==0.9.31
 Flask==2.0.1
+Flask-Cors==3.0.10
 flask-restx==0.5.0
 greenlet==1.1.1
 idna==3.2

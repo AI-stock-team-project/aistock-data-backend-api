@@ -47,7 +47,7 @@ def update():
     print("update_strategy_stock_list.update")
 
 
-def generate_momentum_1month():
+def generate_momentum_1month() -> DataFrame:
     """
     모멘텀 1개월 데이터 생성 및 테이블에 맞게 변환 후 반환
 
@@ -84,7 +84,7 @@ def generate_momentum_1month():
     return df
 
 
-def generate_momentum_3month():
+def generate_momentum_3month() -> DataFrame:
     """
     모멘텀 3개월 데이터 생성 및 테이블에 맞게 변환 후 반환
 
@@ -120,7 +120,7 @@ def generate_momentum_3month():
     return df
 
 
-def generate_speedy():
+def generate_speedy() -> DataFrame:
     strategy_code = 'soaring'
 
     start = time.time()
@@ -140,7 +140,7 @@ def generate_speedy():
     return df
 
 
-def generate_rising_date_freq():
+def generate_rising_date_freq() -> DataFrame:
     strategy_code = 'up_freq'
 
     start = time.time()
@@ -173,7 +173,7 @@ def generate_rising_date_freq():
     return df
 
 
-def generate_dual_momentum():
+def generate_dual_momentum() -> DataFrame:
     strategy_code = 'dual_mo'
 
     start = time.time()
