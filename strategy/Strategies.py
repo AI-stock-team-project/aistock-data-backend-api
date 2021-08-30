@@ -305,7 +305,7 @@ def get_dual_momentum_list():
     """
     stock_dual = get_stocks()
     prices = get_close_prices_all('2021-01-01')
-    dualmomentumlist = dual_momentum(prices, lookback_period=20, n_selection=len(stock_dual) // 2)
+    dualmomentumlist = dual_momentum(prices, lookback_period=60, n_selection=len(stock_dual) // 2)
     return dualmomentumlist
 
 
