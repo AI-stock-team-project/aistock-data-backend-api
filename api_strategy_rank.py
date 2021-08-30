@@ -6,7 +6,7 @@ api_strategy_rank = Namespace('api_strategy_rank')
 
 
 def convert_df(df):
-    df = df[['ticker', 'rank']]
+    df = df[['ticker', 'rank', 'name']]
     return df.to_dict(orient='records')
 
 
@@ -17,11 +17,11 @@ class ApiStrategyTopRank(Resource):
         """전략형 포트폴리오를 구성합니다."""
         # is_debug = False
 
-        mo_1 = StrategyStock.retrive_strategy_stocks_rank('mo_1')
-        mo_3 = StrategyStock.retrive_strategy_stocks_rank('mo_3')
-        soaring = StrategyStock.retrive_strategy_stocks_rank('soaring')
-        up_freq = StrategyStock.retrive_strategy_stocks_rank('up_freq')
-        dual_mo = StrategyStock.retrive_strategy_stocks_rank('dual_mo')
+        mo_1 = StrategyStock.retrive_strategy_stocks_rank_with_name('mo_1')
+        mo_3 = StrategyStock.retrive_strategy_stocks_rank_with_name('mo_3')
+        soaring = StrategyStock.retrive_strategy_stocks_rank_with_name('soaring')
+        up_freq = StrategyStock.retrive_strategy_stocks_rank_with_name('up_freq')
+        dual_mo = StrategyStock.retrive_strategy_stocks_rank_with_name('dual_mo')
 
         return {
             'mo_1': convert_df(mo_1),

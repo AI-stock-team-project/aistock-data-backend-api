@@ -1,7 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy import BigInteger, Column, Integer, String, Float
 import aistock.StockReader as StockReader
-from aistock.StockReader import read_prices_by_dates
 
 # SQLITE 파일 경로
 SQLITE_PATH = 'stock_prices.db'
@@ -72,7 +71,7 @@ def get_minmax_date() -> list:
 
 def fetch_prices_by_dates_sqlite(start_date: str, end_date: str):
     print(start_date, end_date)
-    df = read_prices_by_dates(start_date, end_date)
+    df = StockReader.read_prices_by_dates(start_date, end_date)
 
     # 원하는 컬럼만 지정... 일단 현재 기준으로 사용할 수 있는 건 다 사용하려고 함.
     df2 = df[[

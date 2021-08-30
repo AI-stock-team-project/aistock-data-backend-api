@@ -9,6 +9,7 @@ from datetime import timedelta, datetime
 from sqlalchemy import Column, Integer, String, select, DateTime
 import aistock.database as aistock_database
 from aistock.database import Base, db_session
+from aistock.Stock import StockTable
 
 
 class StrategyCode:
@@ -56,6 +57,23 @@ def retrive_strategy_stocks_rank(code, limit=10) -> DataFrame:
     )
     stmt.order_by(StrategyStockListTable.rank)
     df = pd.read_sql(stmt, db_session.bind)[:10]
+    return df
+
+
+def retrive_strategy_stocks_rank_with_name(code, limit=10) -> DataFrame:
+    """select_stmt = select(StrategyStockListTable, StockTable.name)
+    stmt = select_stmt.where(
+        StrategyStockListTable.strategy_code == code
+    )
+    stmt.join(StockTable, StrategyStockListTable.ticker == StockTable.symbol)
+    stmt.order_by(StrategyStockListTable.rank)
+    df = pd.read_sql(stmt, db_session.bind)[:10]"""
+
+    qs = db_session.query(StrategyStockListTable.ticker, StrategyStockListTable.rank, StockTable.name).filter(
+        StrategyStockListTable.strategy_code == code,
+        StrategyStockListTable.ticker == StockTable.symbol
+    ).order_by(StrategyStockListTable.rank)
+    df = pd.read_sql(qs.statement, db_session.bind)[:10]
     return df
 
 
