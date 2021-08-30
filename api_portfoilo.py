@@ -19,7 +19,7 @@ class MakePortfolio(Resource):
     })
     def post(self, optimize, asset_method):
         """전략형 포트폴리오를 구성합니다."""
-        is_debug = True
+        is_debug = False
 
         # 최적화 방법
         optimize_method = OptimizeMethod.Efficient  # 기본값
@@ -87,7 +87,7 @@ class MakePortfolio(Resource):
             )
 
             # return {'result': rv, 'result_df': df.to_json()}
-            return {'result': rv, 'result_df': df.to_json(orient='records')}
+            return {'result': rv, 'result_df': df.to_dict(orient='records')}
         else:
             rv = {'expected_annual_return': 0.60400610535409, 'annual_volatility': 0.3000171478073243, 'sharpe_ratio': 1.946575752827128, 'balance': 56700.0}
             df = [
