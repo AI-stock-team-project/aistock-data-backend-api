@@ -141,8 +141,12 @@ def make_portfolio(optimize_method=OptimizeMethod.Efficient, asset_method=AssetM
     if optimize_method == OptimizeMethod.MaxSharpe:
         # 포폴 최적화 (Max sharpe ratio)
         ef = EfficientFrontier(mu, S, solver="SCS")
+
+        df_t = fdr.DataReader(f'KR{years}YT=RR')
+        rf_t = df_t.Close[-1]/100
         # noinspection PyUnusedLocal
-        weights = ef.max_sharpe()
+        # weights = ef.max_sharpe()
+        weights = ef.max_sharpe(risk_free_rate=rf_t)
     elif optimize_method == OptimizeMethod.Efficient:
         # 포폴 최적화 (Efficient Risk)
         vol_limit = param_risk_limit
