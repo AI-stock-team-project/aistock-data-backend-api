@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum
+from pathlib import Path
 
 import FinanceDataReader as fdr
 import matplotlib.pyplot as plt
@@ -253,6 +254,13 @@ def make_portfolio(optimize_method=OptimizeMethod.Efficient, asset_method=AssetM
     wealth = (1 + result).cumprod()
 
     # ############ --------- 시각화 -------- ############
+    static_path = Path(__file__).resolve().parent.parent / 'static'
+    dt_now = datetime.now().strftime('%Y%m%d_%H%M%S')
+    trends_file_path = static_path / f'return_trends_{dt_now}.png'
+    votality_file_path = static_path / f'votality_trends_{dt_now}.png'
+    static_url = '/static/'
+    trends_file_url = static_url + f'return_trends_{dt_now}.png'
+    votality_file_url = static_url + f'votality_trends_{dt_now}.png'
     # 포트폴리오와 KOSPI 지수의 '누적 수익률 추이'를 시각화하여 비교
     # matplotlib.pyplot 스타일시트 설정
     plt.style.use('fivethirtyeight')
@@ -265,7 +273,7 @@ def make_portfolio(optimize_method=OptimizeMethod.Efficient, asset_method=AssetM
     plt.xlabel('Date', fontsize=18, labelpad=7)
     plt.ylabel('Return', fontsize=18, labelpad=7)
     plt.legend(loc='best')
-    plt.savefig('return_trends.png', dpi=100)
+    plt.savefig(trends_file_path, dpi=100)
     # plt.show()
 
     # 변동률 비교
@@ -288,7 +296,7 @@ def make_portfolio(optimize_method=OptimizeMethod.Efficient, asset_method=AssetM
     plt.legend(loc='best')
 
     plt.grid(True)
-    plt.savefig('votality_trends.png', dpi=100)
+    plt.savefig(votality_file_path, dpi=100)
     # plt.show()
     # ############# ------------print------------- #####################
     print(f'----- {str(asset_method)} portfolio performance -----')
@@ -309,4 +317,6 @@ def make_portfolio(optimize_method=OptimizeMethod.Efficient, asset_method=AssetM
         'annual_volatility': annual_volatility,
         'sharpe_ratio': sharpe_ratio,
         'balance': leftover,
+        'trends_file_url': trends_file_url,
+        'votality_file_url': votality_file_url
     }, portfolio_df_sorted
