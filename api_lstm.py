@@ -1,22 +1,16 @@
 # noinspection PyUnresolvedReferences
 from flask import Flask, jsonify, request, abort
 from flask_restx import Resource, Namespace
-
-from portfolio.Portfolio import make_portfolio, OptimizeMethod, AssetMethod, get_assets
 from lstm_predicted import stock_prediction
 
-ApiPortfolio = Namespace('api_portfoilo')
+api_lstm = Namespace('api_lstm')
 
 
-@ApiPortfolio.route('/<stock_symbol>')
+@api_lstm.route('/predict_close_price/<stock_symbol>')
 class PredictClosePriceByLSTM(Resource):
-    @ApiPortfolio.doc(params={
+    @api_lstm.doc(params={
         'stock_symbol': '종목 코드',
-        'start_date': '주가데이터 참조 시작일자 (yyyy-mm-dd)',
-        'years': '투자 기간',
-        'money': '투자 금액',
-        'risk_limit': '감당 리스크',
-        'custom_assets': '종목 선택시 종목'
+        'start_date': '주가데이터 참조 시작일자 (yyyy-mm-dd)'
     })
     def post(self, stock_symbol):
         """전략형 포트폴리오를 구성합니다."""
@@ -27,7 +21,7 @@ class PredictClosePriceByLSTM(Resource):
         start_date = params.get('start_date', '2018-01-01', str)
 
         print(f"""
-        [ api api_lstm call ]
+        [ api lstm/predict_close_price call ]
         stock_symbol : {stock_symbol}
         start_date : {start_date}
         """)

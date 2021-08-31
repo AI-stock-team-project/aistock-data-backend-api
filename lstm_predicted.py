@@ -66,7 +66,3 @@ def stock_prediction(ticker, start_date, end_date=datetime.datetime.now().strfti
     plt.show()
 
     return float(raw_df.Close[-1] * pred_y[-1] / dfy.Close[-1]) # 내일 종가
-
-samsung = stock_prediction('005930', '2018-01-01') # 학습
-
-samsung # # 내일 종가

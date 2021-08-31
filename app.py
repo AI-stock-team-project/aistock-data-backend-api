@@ -1,9 +1,11 @@
 # noinspection PyUnresolvedReferences
 from flask import Flask, jsonify, request, send_from_directory
 from flask_restx import Api, Resource
+from flask_cors import CORS
+
 from api_portfoilo import ApiPortfolio
 from api_strategy_rank import api_strategy_rank
-from flask_cors import CORS
+from api_lstm import api_lstm
 
 app = Flask(__name__, static_url_path='/static')  # Flask 객체 선언.
 
@@ -13,13 +15,14 @@ CORS(app)
 # Flask 객체에 Api 객체 등록
 api = Api(
     app,
-    version='0.1',
+    version='0.2',
     title="Aistock's API Server",
     description=""
 )
 
 api.add_namespace(ApiPortfolio, '/portfolio')
 api.add_namespace(api_strategy_rank, '/strategy_rank')
+api.add_namespace(api_lstm, '/lstm')
 
 
 @api.route('/hello')
