@@ -6,6 +6,7 @@ import FinanceDataReader as fdr
 import datetime
 
 
+# noinspection PyPep8Naming
 def MinMaxScaler(data):
     """최솟값과 최댓값을 이용하여 0 ~ 1 값으로 변환"""
     numerator = data - np.min(data, 0)
@@ -18,7 +19,7 @@ def stock_prediction(ticker, start_date, end_date=datetime.datetime.now().strfti
     raw_df = fdr.DataReader(ticker, start_date, end_date)
     window_size = 10
     data_size = 5
-    dfx = raw_df[['Open','High','Low','Volume', 'Close']]
+    dfx = raw_df[['Open', 'High', 'Low', 'Volume', 'Close']]
     dfx = MinMaxScaler(dfx)
     dfy = dfx[['Close']]
 
@@ -28,19 +29,21 @@ def stock_prediction(ticker, start_date, end_date=datetime.datetime.now().strfti
     data_x = []
     data_y = []
     for i in range(len(y) - window_size):
-        _x = x[i : i + window_size] # 다음 날 종가(i+windows_size)는 포함되지 않음
+        _x = x[i: i + window_size]  # 다음 날 종가(i+windows_size)는 포함되지 않음
         _y = y[i + window_size]     # 다음 날 종가
         data_x.append(_x)
         data_y.append(_y)
+    # noinspection PyUnboundLocalVariable
     print(_x, "->", _y)
 
     train_size = int(len(data_y) * 0.7)
-    train_x = np.array(data_x[0 : train_size])
-    train_y = np.array(data_y[0 : train_size])
+    train_x = np.array(data_x[0: train_size])
+    train_y = np.array(data_y[0: train_size])
 
+    # noinspection PyUnusedLocal
     test_size = len(data_y) - train_size
-    test_x = np.array(data_x[train_size : len(data_x)])
-    test_y = np.array(data_y[train_size : len(data_y)])
+    test_x = np.array(data_x[train_size: len(data_x)])
+    test_y = np.array(data_y[train_size: len(data_y)])
 
     # 모델 생성
     model = Sequential()
@@ -65,4 +68,4 @@ def stock_prediction(ticker, start_date, end_date=datetime.datetime.now().strfti
     plt.legend()
     plt.show()
 
-    return float(raw_df.Close[-1] * pred_y[-1] / dfy.Close[-1]) # 내일 종가
+    return float(raw_df.Close[-1] * pred_y[-1] / dfy.Close[-1])  # 내일 종가
