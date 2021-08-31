@@ -29,7 +29,7 @@ def test_2():
         return s.to_list()
     else:
         create_gstocks_sqlite()
-        return StockReader.read_ticker_list()
+        return StockReader.read_tickers_to_list()
 
 
 def retrieve_gstocks_sqlite():
@@ -38,7 +38,7 @@ def retrieve_gstocks_sqlite():
 
 
 def create_gstocks_sqlite():
-    stocks = StockReader.read_ticker_list()
+    stocks = StockReader.read_tickers_to_list()
     df = pd.DataFrame(stocks, columns=["ticker"])
     df.to_sql('g_stocks', con=get_gstocks_sqlite_engine(), index=False, if_exists='replace')
 

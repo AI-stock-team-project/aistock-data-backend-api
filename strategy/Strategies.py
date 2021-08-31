@@ -176,6 +176,7 @@ def up_down_zero(code_updown):
     :param code_updown:
     :return:
     """
+    # 1년 전 날짜
     one_year_ago = (datetime.now() - relativedelta(years=1)).strftime('%Y-%m-%d')
 
     # data = fdr.DataReader(code_updown, one_year_ago)[['Close']]

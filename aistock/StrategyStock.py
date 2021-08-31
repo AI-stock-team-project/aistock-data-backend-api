@@ -50,17 +50,27 @@ def retrieve_strategy_stocks(strategy_code: str) -> DataFrame:
     return df
 
 
+@deprecated
 def retrive_strategy_stocks_rank(code, limit=10) -> DataFrame:
+    """
+    api 로 메인페이지에서 전략별 종목 리스트를 상위 10개 정도 불러오는 기능.
+    메인웹 내부에서 처리하게 변경하였으므로... 필요가 없어졌음...
+    """
     select_stmt = select(StrategyStockListTable)
     stmt = select_stmt.where(
         StrategyStockListTable.strategy_code == code
     )
     stmt.order_by(StrategyStockListTable.rank)
-    df = pd.read_sql(stmt, db_session.bind)[:10]
+    df = pd.read_sql(stmt, db_session.bind)[:limit]
     return df
 
 
+@deprecated
 def retrive_strategy_stocks_rank_with_name(code, limit=10) -> DataFrame:
+    """
+    api 로 메인페이지에서 전략별 종목 리스트를 상위 10개 정도 불러오는 기능.
+    메인웹 내부에서 처리하게 변경하였으므로... 필요가 없어졌음...
+    """
     """select_stmt = select(StrategyStockListTable, StockTable.name)
     stmt = select_stmt.where(
         StrategyStockListTable.strategy_code == code
@@ -73,7 +83,7 @@ def retrive_strategy_stocks_rank_with_name(code, limit=10) -> DataFrame:
         StrategyStockListTable.strategy_code == code,
         StrategyStockListTable.ticker == StockTable.symbol
     ).order_by(StrategyStockListTable.rank)
-    df = pd.read_sql(qs.statement, db_session.bind)[:10]
+    df = pd.read_sql(qs.statement, db_session.bind)[:limit]
     return df
 
 

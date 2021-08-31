@@ -53,15 +53,15 @@ class StockListCols:
     MARKET_CODE = 'MarketCode'
 
 
-def read_ticker_list() -> list:
+def read_tickers_to_list() -> list:
     """
     종목을 조회하는 함수. pykrx를 통해서 로드함.
     :return: list 종목 코드 목록
     """
-    return read_ticker_list_pykrx()
+    return read_tickers_to_list_pykrx()
 
 
-def read_ticker_list_pykrx() -> list:
+def read_tickers_to_list_pykrx() -> list:
     """
     종목을 조회하는 함수.
     'pykrx' 사용
@@ -75,7 +75,7 @@ def read_ticker_list_pykrx() -> list:
 
 
 @deprecated
-def read_ticker_list_pykrx_fundamental() -> list:
+def read_tickers_to_list_pykrx_fundamental() -> list:
     """
     종목을 조회하는 함수. pykrx를 통해서 로드함.
     :return: 종목 코드 목록 (DataFrame)
@@ -238,8 +238,8 @@ def read_prices_by_date(date) -> DataFrame:
 def read_prices_by_dates(start_date: str, end_date: str) -> DataFrame:
     """
     특정 날짜부터 해당 날짜 까지의 전체 주식의 가격 정보를 조회.
-    :param: start_date (yyyy-mm-dd)
-    :raram: end_date (yyyy-mm-dd)
+    :param start_date: (yyyy-mm-dd)
+    :param end_date: (yyyy-mm-dd)
     :return: DataFrame<br>
         Symbol	Date	Open	High	Low	Close	Volume	Trad_value	Fluc_rate<br>
     0	060310	2019-05-20	2605	2615	2470	2570	246378	626177635	-1.34<br>
@@ -266,6 +266,13 @@ def read_prices_by_dates(start_date: str, end_date: str) -> DataFrame:
 
 
 def read_index_by(index_symbol, start_date: str, end_date: str):
+    """
+    인덱스 주가를 가져오는 기능.
+    (FinanceDataReader 이용)
+    :param index_symbol: kospi/kosdaq
+    :param start_date: 조회를 시작할 연월일 (yyyy-mm-dd)
+    :param end_date: 조회를 마칠 연월일 (yyyy-mm-dd)
+    """
     symbols = {
         'kospi': 'KS11',
         'kosdaq': 'KQ11'
