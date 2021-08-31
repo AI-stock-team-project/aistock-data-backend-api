@@ -8,6 +8,7 @@ from dateutil.relativedelta import relativedelta
 from deprecated import deprecated
 import os
 import warnings
+import numpy as np
 
 import FinanceDataReader as fdr
 from sqlalchemy import create_engine
@@ -17,8 +18,11 @@ from aistock.StockPrice import get_close_prices_by, StockPriceTable, get_volumes
 # PerformanceWarning: DataFrame is highly fragmented. 문구 방지
 warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
-# 글로벌 변수로 전환. 자꾸 로드하는 것을 줄일 수 있음. (큰 차이는 안 나는 듯..)
+# 종목 리스트를 글로벌 변수로 재이용하기 위함.
 g_stocks = None
+
+# 임시로 만드는 sqlite 파일. 변수의 재사용을 줄이기 위한 목적으로 생성한다.
+# 값이 오래된 것 같으면 이 파일을 삭제해주면, 도커 재시작시 재생성하게 된다.
 G_STOCKS_SQLITE = 'g_stocks.db'
 
 
@@ -207,7 +211,17 @@ def up_down_zero(code_updown):
     """
 
     total_days = len(data_rtn.index)
-    return up / total_days, down / total_days, nothing / total_days
+
+    up_days, down_days, zero_days = 0, 0, 0
+    if up > 0:
+        up_days = up / total_days
+    if down > 0:
+        down_days = down / total_days
+    if zero_days > 0:
+        zero_days = nothing / total_days
+
+    # return up / total_days, down / total_days, nothing / total_days
+    return up_days, down_days, zero_days
 
 
 def get_up_down_zero_df() -> DataFrame:
@@ -311,7 +325,17 @@ def get_dual_momentum_list():
 
 
 def create_gstocks_sqlite() -> list:
-    stocks = StockReader.read_ticker_list()
+    """
+    종목을 조회해서 sqlite 에 저장하는 기능.
+    매번 조회하는 것이 부담되기 때문에, sqlite에 저장을 해두고 재사용한다.
+
+    관리종목을 삭제하는 기능이 추가되었다. (2021-09-01)
+    """
+    stocks = StockReader.read_tickers_to_list()
+
+    # 거래 정지 목록을 제외한 나머지
+    stocks = StockReader.except_stop_stocks(stocks)
+
     df = pd.DataFrame(stocks, columns=["ticker"])
     df.to_sql('g_stocks', con=get_gstocks_sqlite_engine(), index=False, if_exists='replace')
     return stocks

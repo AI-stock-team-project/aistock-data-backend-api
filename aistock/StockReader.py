@@ -11,6 +11,7 @@ import time
 from datetime import timedelta
 import FinanceDataReader as fdr
 import pandas as pd
+import numpy as np
 from deprecated import deprecated
 from pandas import DataFrame, json_normalize
 from pykrx import stock
@@ -263,6 +264,26 @@ def read_prices_by_dates(start_date: str, end_date: str) -> DataFrame:
         time.sleep(1)
     df.reset_index(inplace=True)
     return df
+
+
+def read_stop_stocks():
+    """
+    관리 종목을 조회하는 기능.
+    (FinanceDataReader 이용)
+    관리 종목은 관리받는 종목을 의미한다. 거래정지가 되어있거나 한다.
+    """
+    # KRX stock delisting symbol list and names 관리종목 리스트
+    krx_adm = fdr.StockListing('KRX-ADMINISTRATIVE')  # 관리종목
+    return krx_adm
+
+
+def except_stop_stocks(tickers: list):
+    # 거래 정지 목록을 조회
+    stop_stocks = read_stop_stocks()['Symbol'].values
+    # 거래 정지 목록을 제외한 나머지
+    tickers_np = np.array(tickers)
+    excepted_list = np.setdiff1d(tickers_np, stop_stocks)
+    return excepted_list.tolist()
 
 
 def read_index_by(index_symbol, start_date: str, end_date: str):
