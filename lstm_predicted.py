@@ -3,7 +3,8 @@ from tensorflow.keras.layers import Dense, LSTM, Dropout
 import numpy as np
 import matplotlib.pyplot as plt
 import FinanceDataReader as fdr
-import datetime
+from datetime import datetime
+from pathlib import Path
 
 
 # noinspection PyPep8Naming
@@ -15,7 +16,7 @@ def MinMaxScaler(data):
     return numerator / (denominator + 1e-7)
 
 
-def stock_prediction(ticker, start_date, end_date=datetime.datetime.now().strftime('%Y-%m-%d')):
+def stock_prediction(ticker, start_date, end_date=datetime.now().strftime('%Y-%m-%d')):
     raw_df = fdr.DataReader(ticker, start_date, end_date)
     window_size = 10
     data_size = 5
@@ -59,6 +60,15 @@ def stock_prediction(ticker, start_date, end_date=datetime.datetime.now().strfti
     pred_y = model.predict(test_x)
 
     # Visualising the results
+    # 경로
+    static_path = Path(__file__).resolve().parent / 'static'
+    static_url = '/static/'
+    # 파일명
+    dt_now = datetime.now().strftime('%Y%m%d_%H%M%S')
+    image_file_name = f'return_lstm_{dt_now}.png'
+    image_file_path = static_path / image_file_name
+    image_file_url = static_url + image_file_name
+    
     plt.figure()
     plt.plot(test_y, color='red', label='real SEC stock price')
     plt.plot(pred_y, color='blue', label='predicted SEC stock price')
@@ -67,5 +77,11 @@ def stock_prediction(ticker, start_date, end_date=datetime.datetime.now().strfti
     plt.ylabel('stock price')
     plt.legend()
     plt.show()
+    # 이미지 저장
+    plt.savefig(image_file_path, dpi=100)
 
-    return float(raw_df.Close[-1] * pred_y[-1] / dfy.Close[-1])  # 내일 종가
+    result_close_price = float(raw_df.Close[-1] * pred_y[-1] / dfy.Close[-1])  # 내일 종가
+    return {
+        'close_price': result_close_price,
+        'graph_url': image_file_url
+    }

@@ -27,8 +27,13 @@ class PredictClosePriceByLSTM(Resource):
         """)
 
         if not is_debug:
-            predicted = stock_prediction(stock_symbol, start_date)
+            prediction_result = stock_prediction(stock_symbol, start_date)
+
             # return {'result': rv, 'result_df': df.to_json()}
-            return {'predict_close_price': predicted, 'param_stock_symbol': stock_symbol}
+            return {
+                'predict_close_price': prediction_result['close_price'],
+                'graph_url': prediction_result['graph_url'],
+                'param_stock_symbol': stock_symbol
+            }
         else:
             return {'predict_close_price': 123456, 'param_stock_symbol': stock_symbol}

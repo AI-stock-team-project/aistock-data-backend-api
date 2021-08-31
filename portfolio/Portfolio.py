@@ -259,10 +259,10 @@ def make_portfolio(optimize_method=OptimizeMethod.Efficient, asset_method=AssetM
 
     # ############ --------- 시각화 -------- ############
     static_path = Path(__file__).resolve().parent.parent / 'static'
+    static_url = '/static/'
     dt_now = datetime.now().strftime('%Y%m%d_%H%M%S')
     trends_file_path = static_path / f'return_trends_{dt_now}.png'
     votality_file_path = static_path / f'votality_trends_{dt_now}.png'
-    static_url = '/static/'
     trends_file_url = static_url + f'return_trends_{dt_now}.png'
     votality_file_url = static_url + f'votality_trends_{dt_now}.png'
     # 포트폴리오와 KOSPI 지수의 '누적 수익률 추이'를 시각화하여 비교
