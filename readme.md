@@ -28,6 +28,8 @@
 7. `pip install flask-restx` : ansio8601, Flask, jsonschema, pytz, six, werkzeug
    1. `pip install flask-cors` : flask, six
       - flask api를 ajax통신하는데 필요로 함.
+8. `pip install tensorflow`
+   - lstm 을 이용하는데 사용됨.
 
 
 # Docker 생성 및 컨테이너 실행

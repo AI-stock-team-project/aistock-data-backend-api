@@ -162,8 +162,9 @@ def generate_rising_date_freq() -> DataFrame:
     # df.drop(['up_rank'], axis=1, inplace=True)
     df.insert(0, 'strategy_code', strategy_code)
 
-    # 최대 200개까지만 추림
-    df = df.iloc[:200]
+    # 최대 30개까지만 추림
+    # df = df.iloc[:200]
+    df = df.iloc[:30]
 
     # print(df)
     if IS_DEBUG:
