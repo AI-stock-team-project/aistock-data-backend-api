@@ -33,3 +33,6 @@ venv.bak/
 *.csv
 !stock_prices.db
 activate.cmd
+!static/_return_trends_sample.png
+!static/_votality_trends_sample.png
+!static/_return_lstm_sample.png
