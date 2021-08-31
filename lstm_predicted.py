@@ -76,7 +76,7 @@ def stock_prediction(ticker, start_date, end_date=datetime.now().strftime('%Y-%m
     plt.xlabel('time')
     plt.ylabel('stock price')
     plt.legend()
-    plt.show()
+    # plt.show()
     # 이미지 저장
     plt.savefig(image_file_path, dpi=100)
 
