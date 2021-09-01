@@ -74,7 +74,7 @@ def memontum_month(_momentum_type: str) -> DataFrame:
 
     """
     if _momentum_type == '3month':
-        start_date_before = -90
+        start_date_before = -100
         pct_change_base = 60
     else:
         start_date_before = -40
