@@ -19,7 +19,7 @@ def update_prices(begin_date: str):
 
     begin_datetime = datetime.date.fromisoformat(begin_date)
     # today = datetime.datetime.today().strftime('%Y-%m-%d')
-    today = datetime.date.today()
+    # today = datetime.date.today()
     yesterday = datetime.date.today() - timedelta(days=1)
     end_datetime = yesterday
 
