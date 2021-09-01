@@ -32,6 +32,11 @@ venv.bak/
 *.db
 *.csv
 !stock_prices.db
+!stock_prices_2016.db
+!stock_prices_2017.db
+!stock_prices_2018.db
+!stock_prices_2019.db
+!stock_prices_2020.db
 activate.cmd
 !static/_return_trends_sample.png
 !static/_votality_trends_sample.png
