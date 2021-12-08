@@ -48,4 +48,4 @@ docker run --env-file ./.local.env --name aistock-stockdata-api -d -p 26000:5000
 ```
 
 # 내부적인 코드
-* /update_stock_table.py : 데이터베이스 테이블의 종목 목록을 갱신함.
+* /update_stock_table.py : 데이터베이스 테이블의 종목 목록을 갱신함
